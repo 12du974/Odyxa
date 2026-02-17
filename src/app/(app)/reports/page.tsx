@@ -6,13 +6,20 @@ import { Button } from '@/components/ui/button';
 import { BarChart3, ArrowUpRight, Calendar, Globe } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ReportsPage() {
-  const audits = await prisma.audit.findMany({
-    where: { status: 'COMPLETED' },
-    include: { project: true },
-    orderBy: { completedAt: 'desc' },
-    take: 50,
-  });
+  let audits: any[] = [];
+  try {
+    audits = await prisma.audit.findMany({
+      where: { status: 'COMPLETED' },
+      include: { project: true },
+      orderBy: { completedAt: 'desc' },
+      take: 50,
+    });
+  } catch {
+    /* DB not available */
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">

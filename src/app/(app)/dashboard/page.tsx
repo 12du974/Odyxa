@@ -41,14 +41,22 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Annule',
 };
 
-export default async function DashboardPage() {
-  const audits = await prisma.audit.findMany({
-    include: { project: true },
-    orderBy: { createdAt: 'desc' },
-    take: 20,
-  });
+export const dynamic = 'force-dynamic';
 
-  const projectCount = await prisma.project.count();
+export default async function DashboardPage() {
+  let audits: any[] = [];
+  let projectCount = 0;
+  try {
+    audits = await prisma.audit.findMany({
+      include: { project: true },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    });
+    projectCount = await prisma.project.count();
+  } catch {
+    /* DB not available */
+  }
+
   const completedAudits = audits.filter((a) => a.status === 'COMPLETED');
   const totalIssues = audits.reduce((sum, a) => sum + a.issuesFound, 0);
   const avgScore = completedAudits.length > 0

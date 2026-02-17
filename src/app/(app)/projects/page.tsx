@@ -6,14 +6,21 @@ import { Badge } from '@/components/ui/badge';
 import { Globe, Plus, ArrowUpRight, BarChart3 } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProjectsPage() {
-  const projects = await prisma.project.findMany({
-    include: {
-      audits: { orderBy: { createdAt: 'desc' }, take: 1 },
-      _count: { select: { audits: true } },
-    },
-    orderBy: { updatedAt: 'desc' },
-  });
+  let projects: any[] = [];
+  try {
+    projects = await prisma.project.findMany({
+      include: {
+        audits: { orderBy: { createdAt: 'desc' }, take: 1 },
+        _count: { select: { audits: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+  } catch {
+    /* DB not available */
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">

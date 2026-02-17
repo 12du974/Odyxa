@@ -45,10 +45,14 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  const audits = await prisma.audit.findMany({
-    include: { project: true },
-    orderBy: { createdAt: 'desc' },
-    take: 50,
-  });
-  return NextResponse.json({ audits });
+  try {
+    const audits = await prisma.audit.findMany({
+      include: { project: true },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    return NextResponse.json({ audits });
+  } catch {
+    return NextResponse.json({ audits: [] });
+  }
 }

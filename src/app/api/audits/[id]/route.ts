@@ -6,10 +6,15 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const audit = await prisma.audit.findUnique({
-    where: { id: params.id },
-    include: { project: true },
-  });
+  let audit: any = null;
+  try {
+    audit = await prisma.audit.findUnique({
+      where: { id: params.id },
+      include: { project: true },
+    });
+  } catch {
+    return NextResponse.json({ error: 'DB non disponible' }, { status: 503 });
+  }
 
   if (!audit) {
     return NextResponse.json({ error: 'Audit non trouve' }, { status: 404 });

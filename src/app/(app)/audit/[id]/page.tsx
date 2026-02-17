@@ -15,19 +15,24 @@ function parseJson<T>(value: string | null, fallback: T): T {
 }
 
 export default async function AuditReportPage({ params }: { params: { id: string } }) {
-  const audit = await prisma.audit.findUnique({
-    where: { id: params.id },
-    include: {
-      project: true,
-      pages: {
-        include: { issues: true },
-        orderBy: { createdAt: 'asc' },
+  let audit: any = null;
+  try {
+    audit = await prisma.audit.findUnique({
+      where: { id: params.id },
+      include: {
+        project: true,
+        pages: {
+          include: { issues: true },
+          orderBy: { createdAt: 'asc' },
+        },
+        issues: {
+          orderBy: [{ severity: 'asc' }, { impact: 'desc' }],
+        },
       },
-      issues: {
-        orderBy: [{ severity: 'asc' }, { impact: 'desc' }],
-      },
-    },
-  });
+    });
+  } catch {
+    notFound();
+  }
 
   if (!audit || audit.status !== 'COMPLETED') {
     notFound();
@@ -35,7 +40,7 @@ export default async function AuditReportPage({ params }: { params: { id: string
 
   const scoreBreakdown = parseJson<Record<string, number>>(audit.scoreBreakdown, {});
 
-  const pages = audit.pages.map((page) => ({
+  const pages = audit.pages.map((page: any) => ({
     id: page.id,
     url: page.url,
     title: page.title,
@@ -44,7 +49,7 @@ export default async function AuditReportPage({ params }: { params: { id: string
     screenshots: parseJson<Record<string, string>>(page.screenshots, {}),
     performanceMetrics: parseJson<Record<string, number>>(page.performanceMetrics, {}),
     scoreBreakdown: parseJson<Record<string, number>>(page.scoreBreakdown, {}),
-    issues: page.issues.map((issue) => ({
+    issues: page.issues.map((issue: any) => ({
       id: issue.id,
       title: issue.title,
       description: issue.description,
@@ -62,7 +67,7 @@ export default async function AuditReportPage({ params }: { params: { id: string
     })),
   }));
 
-  const issues = audit.issues.map((issue) => ({
+  const issues = audit.issues.map((issue: any) => ({
     id: issue.id,
     title: issue.title,
     description: issue.description,
@@ -79,8 +84,8 @@ export default async function AuditReportPage({ params }: { params: { id: string
     pageAuditId: issue.pageAuditId,
   }));
 
-  const criticalCount = issues.filter((i) => i.severity === 'CRITICAL').length;
-  const majorCount = issues.filter((i) => i.severity === 'MAJOR').length;
+  const criticalCount = issues.filter((i: any) => i.severity === 'CRITICAL').length;
+  const majorCount = issues.filter((i: any) => i.severity === 'MAJOR').length;
 
   return (
     <div className="space-y-8 animate-fade-in">

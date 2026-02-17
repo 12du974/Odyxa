@@ -36,9 +36,9 @@ const statusLabels: Record<string, string> = {
   CRAWLING: 'Crawling...',
   SCANNING: 'Scan...',
   ANALYZING: 'Analyse...',
-  COMPLETED: 'Termine',
-  FAILED: 'Echoue',
-  CANCELLED: 'Annule',
+  COMPLETED: 'Termin\u00e9',
+  FAILED: '\u00c9chou\u00e9',
+  CANCELLED: 'Annul\u00e9',
 };
 
 export const dynamic = 'force-dynamic';
@@ -86,28 +86,28 @@ export default async function DashboardPage() {
         <StatCard
           title="Score moyen"
           value={avgScore !== null ? `${avgScore}` : '--'}
-          subtitle={avgScore !== null ? (avgScore >= 70 ? 'Bonne sante UX' : 'Ameliorations necessaires') : 'Aucun audit'}
+          subtitle={avgScore !== null ? (avgScore >= 70 ? 'Bonne sant\u00e9 UX' : 'Am\u00e9liorations n\u00e9cessaires') : 'Aucun audit'}
           icon={<TrendingUp className="h-4 w-4" />}
           iconBg="bg-odyxa-navy/10 text-odyxa-purple"
         />
         <StatCard
           title="Projets"
           value={`${projectCount}`}
-          subtitle="Sites web audites"
+          subtitle="Sites web audit\u00e9s"
           icon={<Globe className="h-4 w-4" />}
           iconBg="bg-blue-500/10 text-blue-500"
         />
         <StatCard
-          title="Audits realises"
+          title="Audits r\u00e9alis\u00e9s"
           value={`${completedAudits.length}`}
           subtitle={`${audits.length - completedAudits.length} en cours`}
           icon={<CheckCircle2 className="h-4 w-4" />}
           iconBg="bg-green-500/10 text-green-500"
         />
         <StatCard
-          title="Issues detectees"
+          title="Probl\u00e8mes d\u00e9tect\u00e9s"
           value={`${totalIssues}`}
-          subtitle="A travers tous les audits"
+          subtitle="\u00c0 travers tous les audits"
           icon={<AlertTriangle className="h-4 w-4" />}
           iconBg="bg-orange-500/10 text-orange-500"
         />
@@ -116,7 +116,7 @@ export default async function DashboardPage() {
       {/* Recent Audits */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Audits recents</h2>
+          <h2 className="text-lg font-semibold">Audits r\u00e9cents</h2>
           {audits.length > 5 && (
             <Link href="/reports" className="text-sm text-primary hover:underline flex items-center gap-1">
               Voir tout <ArrowUpRight className="h-3 w-3" />
@@ -142,7 +142,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {audits.map((audit, i) => (
               <Link key={audit.id} href={audit.status === 'COMPLETED' ? `/audit/${audit.id}` : `/audit/${audit.id}/progress`}>
                 <Card className="group cursor-pointer transition-all hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">{audit.issuesFound}</p>
-                        <p className="text-xs text-muted-foreground">issues</p>
+                        <p className="text-xs text-muted-foreground">probl\u00e8mes</p>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground">

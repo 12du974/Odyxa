@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 function getScoreColor(score: number): string {
-  if (score >= 90) return '#5B3FD6';
-  if (score >= 75) return '#79AAE4';
-  if (score >= 50) return '#E78059';
-  if (score >= 25) return '#f97316';
+  if (score >= 80) return '#16a34a';
+  if (score >= 60) return '#f97316';
   return '#ef4444';
 }
 
@@ -73,10 +72,15 @@ export function ScoreGauge({ score, size = 160, strokeWidth = 10, label, animate
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl font-bold tabular-nums" style={{ color }}>
+          <span className={cn(
+            'font-bold tabular-nums',
+            size >= 140 ? 'text-2xl' : 'text-lg'
+          )} style={{ color }}>
             {displayScore}
           </span>
-          <span className="text-xs text-muted-foreground font-medium">{scoreLabel}</span>
+          {size >= 100 && (
+            <span className="text-[10px] text-muted-foreground font-medium">{scoreLabel}</span>
+          )}
         </div>
       </div>
       {label && <p className="text-sm font-medium text-muted-foreground">{label}</p>}

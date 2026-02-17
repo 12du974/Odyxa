@@ -14,8 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/audit/new', icon: Plus, label: 'Nouvel Audit' },
-  { href: '/projects', icon: FolderKanban, label: 'Projets' },
-  { href: '/reports', icon: BarChart3, label: 'Rapports' },
+  { href: '/projects', icon: FolderKanban, label: 'Rapports' },
   { href: '/settings', icon: Settings, label: 'Param\u00e8tres' },
 ];
 

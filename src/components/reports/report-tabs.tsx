@@ -79,14 +79,25 @@ interface ReportTabsProps {
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
+const FRAMEWORK_URLS: Record<string, string> = {
+  'WCAG 2.2': 'https://www.w3.org/TR/WCAG22/',
+  'Core Web Vitals': 'https://web.dev/vitals/',
+  'Design System Consistency': 'https://designsystemchecklist.com/',
+  'Standards Formulaires': 'https://www.w3.org/WAI/tutorials/forms/',
+  'Standards de Contenu': 'https://www.w3.org/WAI/WCAG21/Understanding/reading-level.html',
+  'SEO Technique': 'https://developers.google.com/search/docs',
+  "Architecture de l'Information": 'https://www.nngroup.com/articles/ia-vs-navigation/',
+  'Dark Patterns Detection': 'https://www.deceptive.design/',
+};
+
 type TabId = 'resume' | 'categories' | 'issues' | 'pages' | 'roadmap';
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'resume', label: 'Resume', icon: LayoutDashboard },
-  { id: 'categories', label: 'Par Categorie', icon: Grid3X3 },
-  { id: 'issues', label: 'Issues', icon: AlertTriangle },
-  { id: 'pages', label: 'Par Page', icon: FileText },
-  { id: 'roadmap', label: 'Roadmap', icon: Rocket },
+  { id: 'resume', label: 'R\u00e9sum\u00e9', icon: LayoutDashboard },
+  { id: 'categories', label: 'Cat\u00e9gories', icon: Grid3X3 },
+  { id: 'issues', label: 'Probl\u00e8mes', icon: AlertTriangle },
+  { id: 'pages', label: 'Par page', icon: FileText },
+  { id: 'roadmap', label: 'Feuille de route', icon: Rocket },
 ];
 
 const SEVERITY_BADGE_MAP: Record<string, 'critical' | 'major' | 'minor' | 'suggestion'> = {
@@ -97,9 +108,9 @@ const SEVERITY_BADGE_MAP: Record<string, 'critical' | 'major' | 'minor' | 'sugge
 };
 
 const EFFORT_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  QUICK_WIN: { label: 'Quick Win', icon: Zap, color: 'text-green-500' },
-  MEDIUM: { label: 'Effort Moyen', icon: Clock, color: 'text-yellow-500' },
-  LONG_TERM: { label: 'Long Terme', icon: Calendar, color: 'text-orange-500' },
+  QUICK_WIN: { label: 'Gain rapide', icon: Zap, color: 'text-green-600' },
+  MEDIUM: { label: 'Effort mod\u00e9r\u00e9', icon: Clock, color: 'text-orange-500' },
+  LONG_TERM: { label: 'Long terme', icon: Calendar, color: 'text-red-500' },
 };
 
 const VIEWPORT_OPTIONS = [
@@ -322,6 +333,19 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
 /*  RESUME TAB                                                         */
 /* ================================================================== */
 
+const NIELSEN_HEURISTICS = [
+  { id: 'visibility', label: 'Visibilit\u00e9 du statut', desc: 'Le syst\u00e8me informe l\u2019utilisateur de ce qui se passe' },
+  { id: 'match', label: 'Correspondance monde r\u00e9el', desc: 'Le langage est familier et logique pour l\u2019utilisateur' },
+  { id: 'control', label: 'Contr\u00f4le utilisateur', desc: 'L\u2019utilisateur peut annuler et revenir en arri\u00e8re' },
+  { id: 'consistency', label: 'Coh\u00e9rence et standards', desc: 'Les conventions de la plateforme sont respect\u00e9es' },
+  { id: 'error-prevention', label: 'Pr\u00e9vention des erreurs', desc: 'Le design emp\u00eache les erreurs avant qu\u2019elles surviennent' },
+  { id: 'recognition', label: 'Reconnaissance vs rappel', desc: 'L\u2019information est visible, pas \u00e0 m\u00e9moriser' },
+  { id: 'flexibility', label: 'Flexibilit\u00e9 et efficacit\u00e9', desc: 'Des raccourcis pour les utilisateurs exp\u00e9riment\u00e9s' },
+  { id: 'aesthetic', label: 'Esth\u00e9tique et minimalisme', desc: 'Pas d\u2019information superflue' },
+  { id: 'error-recovery', label: 'Aide \u00e0 la correction', desc: 'Les messages d\u2019erreur sont clairs et utiles' },
+  { id: 'help', label: 'Aide et documentation', desc: 'Une documentation accessible si n\u00e9cessaire' },
+];
+
 function ResumeTab({
   globalScore,
   scoreBreakdown,
@@ -339,18 +363,49 @@ function ResumeTab({
   toggleIssue: (id: string) => void;
   expandedIssues: Set<string>;
 }) {
+  const criticalCount = issues.filter(i => i.severity === 'CRITICAL').length;
+  const majorCount = issues.filter(i => i.severity === 'MAJOR').length;
+  const minorCount = issues.filter(i => i.severity === 'MINOR').length;
+
   return (
     <div className="space-y-6">
-      {/* Score */}
+      {/* Header synth\u00e9tique */}
       <Card>
-        <CardContent className="flex flex-col items-center py-8">
-          <p className="mb-4 text-sm font-medium text-muted-foreground">Score Global</p>
-          <ScoreGauge score={globalScore} size={200} strokeWidth={12} />
-          {summary && (
-            <p className="mt-6 max-w-2xl text-center text-sm text-muted-foreground leading-relaxed">
-              {summary}
-            </p>
-          )}
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <ScoreGauge score={globalScore} size={140} strokeWidth={10} />
+            <div className="flex-1 text-center sm:text-left space-y-3">
+              <div>
+                <h3 className="text-lg font-semibold">Bilan de l&rsquo;audit</h3>
+                {summary && (
+                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{summary}</p>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+                {criticalCount > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                    {criticalCount} critique{criticalCount > 1 ? 's' : ''}
+                  </span>
+                )}
+                {majorCount > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                    {majorCount} majeur{majorCount > 1 ? 's' : ''}
+                  </span>
+                )}
+                {minorCount > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                    {minorCount} mineur{minorCount > 1 ? 's' : ''}
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  {issues.length} probl\u00e8me{issues.length !== 1 ? 's' : ''} au total
+                </span>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -358,7 +413,7 @@ function ResumeTab({
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Scores par Categorie</CardTitle>
+            <CardTitle className="text-base">Scores par cat\u00e9gorie</CardTitle>
           </CardHeader>
           <CardContent>
             <CategoryChart scores={scoreBreakdown} type="bar" />
@@ -367,7 +422,7 @@ function ResumeTab({
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Repartition par Severite</CardTitle>
+            <CardTitle className="text-base">R\u00e9partition par s\u00e9v\u00e9rit\u00e9</CardTitle>
           </CardHeader>
           <CardContent>
             <SeverityChart issues={issues} />
@@ -375,12 +430,12 @@ function ResumeTab({
         </Card>
       </div>
 
-      {/* Frameworks breakdown */}
+      {/* R\u00e9f\u00e9rentiels — tags sobres */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-muted-foreground" />
-            R&eacute;f&eacute;rentiels &amp; Frameworks
+            R\u00e9f\u00e9rentiels
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -394,34 +449,50 @@ function ResumeTab({
               .sort((a, b) => b[1] - a[1])
               .map(([fw, count]) => {
                 const config = FRAMEWORK_CONFIG[fw];
-                return (
-                  <div
+                const fwUrl = FRAMEWORK_URLS[fw];
+                const tag = (
+                  <span
                     key={fw}
-                    className={cn(
-                      'flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors',
-                      config ? config.bg : 'border-border bg-muted'
-                    )}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground"
                   >
-                    <BookOpen className={cn('h-3.5 w-3.5', config?.color ?? 'text-muted-foreground')} />
-                    <div>
-                      <p className={cn('text-xs font-medium', config?.color ?? 'text-foreground')}>
-                        {config?.label ?? fw}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {count} issue{count > 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  </div>
+                    {config?.label ?? fw}
+                    <span className="text-muted-foreground">({count})</span>
+                  </span>
                 );
+                return fwUrl ? (
+                  <a key={fw} href={fwUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                    {tag}
+                  </a>
+                ) : tag;
               })}
           </div>
         </CardContent>
       </Card>
 
-      {/* Top 5 issues */}
+      {/* Heuristiques de Nielsen */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Top 5 Issues Prioritaires</CardTitle>
+          <CardTitle className="text-base">Crit\u00e8res de Jakob Nielsen</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {NIELSEN_HEURISTICS.map((h) => (
+              <div key={h.id} className="flex items-start gap-2 rounded-lg border border-border p-3">
+                <span className="mt-0.5 h-2 w-2 rounded-full bg-green-500 shrink-0" />
+                <div>
+                  <p className="text-xs font-medium">{h.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{h.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Top 5 probl\u00e8mes */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Top 5 probl\u00e8mes prioritaires</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {topIssues.map((issue, idx) => (
@@ -454,7 +525,7 @@ function CategoriesTab({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Vue Radar</CardTitle>
+          <CardTitle className="text-base">Vue radar</CardTitle>
         </CardHeader>
         <CardContent>
           <CategoryChart scores={scoreBreakdown} type="radar" />
@@ -462,34 +533,31 @@ function CategoriesTab({
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {Object.entries(categoryStats).map(([cat, stats]) => (
-          <Card key={cat} className="group hover:border-primary/30 transition-colors">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">
-                    {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.issueCount} issue{stats.issueCount !== 1 ? 's' : ''}
-                  </p>
+        {Object.entries(categoryStats).map(([cat, stats]) => {
+          const scoreColor = stats.score >= 80 ? 'text-green-600' : stats.score >= 60 ? 'text-orange-500' : 'text-red-500';
+          return (
+            <Card key={cat} className="group hover:border-primary/30 transition-colors">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">
+                      {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {stats.issueCount} probl\u00e8me{stats.issueCount !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className={cn('text-lg font-bold tabular-nums', scoreColor)}>
+                      {stats.score}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">/100</span>
+                  </div>
                 </div>
-                <ScoreGauge score={stats.score} size={56} strokeWidth={4} animated={false} />
-              </div>
-              <div className="mt-3">
-                <div className="h-1.5 w-full rounded-full bg-muted">
-                  <div
-                    className="h-1.5 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${stats.score}%`,
-                      backgroundColor: getScoreColor(stats.score),
-                    }}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
@@ -528,12 +596,12 @@ function IssuesTab({
   expandedIssues: Set<string>;
   toggleIssue: (id: string) => void;
 }) {
-  const severityButtons: { key: string; label: string; variant: 'outline' | 'critical' | 'major' | 'minor' | 'suggestion' }[] = [
-    { key: 'ALL', label: 'Toutes', variant: 'outline' },
-    { key: 'CRITICAL', label: 'Critiques', variant: 'critical' },
-    { key: 'MAJOR', label: 'Majeures', variant: 'major' },
-    { key: 'MINOR', label: 'Mineures', variant: 'minor' },
-    { key: 'SUGGESTION', label: 'Suggestions', variant: 'suggestion' },
+  const severityButtons: { key: string; label: string }[] = [
+    { key: 'ALL', label: 'Tous' },
+    { key: 'CRITICAL', label: 'Critiques' },
+    { key: 'MAJOR', label: 'Majeurs' },
+    { key: 'MINOR', label: 'Mineurs' },
+    { key: 'SUGGESTION', label: 'Suggestions' },
   ];
 
   return (
@@ -541,45 +609,40 @@ function IssuesTab({
       {/* Severity filters */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
-          {severityButtons.map((btn) => (
-            <button
-              key={btn.key}
-              onClick={() => setSeverityFilter(btn.key)}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all',
-                severityFilter === btn.key
-                  ? btn.key === 'ALL'
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : btn.key === 'CRITICAL'
-                      ? 'border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400'
-                      : btn.key === 'MAJOR'
-                        ? 'border-orange-500/50 bg-orange-500/10 text-orange-600 dark:text-orange-400'
-                        : btn.key === 'MINOR'
-                          ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
-                          : 'border-blue-500/50 bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                  : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-              )}
-            >
-              {btn.label}
-              <span className="tabular-nums opacity-70">
-                ({severityCounts[btn.key] ?? 0})
-              </span>
-            </button>
-          ))}
+          {severityButtons.map((btn) => {
+            const isActive = severityFilter === btn.key;
+            const activeColor =
+              btn.key === 'CRITICAL' ? 'border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300' :
+              btn.key === 'MAJOR' ? 'border-orange-300 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300' :
+              'border-foreground/20 bg-muted text-foreground';
+            return (
+              <button
+                key={btn.key}
+                onClick={() => setSeverityFilter(btn.key)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-all',
+                  isActive ? activeColor : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+                )}
+              >
+                {btn.label}
+                <span className="tabular-nums opacity-70">({severityCounts[btn.key] ?? 0})</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Framework filter pills */}
+        {/* Framework filter pills — tags sobres */}
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
             <BookOpen className="h-3.5 w-3.5" />
-            <span className="font-medium">Framework :</span>
+            <span className="font-medium">R\u00e9f\u00e9rentiel :</span>
           </div>
           <button
             onClick={() => setFrameworkFilter('ALL')}
             className={cn(
-              'inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-medium transition-all',
+              'inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-all',
               frameworkFilter === 'ALL'
-                ? 'border-primary bg-primary/10 text-primary'
+                ? 'border-foreground/20 bg-muted text-foreground'
                 : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
             )}
           >
@@ -593,12 +656,10 @@ function IssuesTab({
                 key={fw}
                 onClick={() => setFrameworkFilter(fw)}
                 className={cn(
-                  'inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-medium transition-all',
-                  isActive && config
-                    ? `${config.bg} ${config.color}`
-                    : isActive
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+                  'inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-all',
+                  isActive
+                    ? 'border-foreground/20 bg-muted text-foreground'
+                    : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
                 )}
               >
                 {config?.abbrev ?? fw}
@@ -625,9 +686,9 @@ function IssuesTab({
         </div>
       </div>
 
-      {/* Count */}
+      {/* Compteur */}
       <p className="text-sm text-muted-foreground">
-        {filteredIssues.length} issue{filteredIssues.length !== 1 ? 's' : ''} trouv\u00e9e{filteredIssues.length !== 1 ? 's' : ''}
+        {filteredIssues.length} probl\u00e8me{filteredIssues.length !== 1 ? 's' : ''} trouv\u00e9{filteredIssues.length !== 1 ? 's' : ''}
       </p>
 
       {/* Issue list */}
@@ -711,7 +772,7 @@ function PagesTab({
                   {page.pageScore !== null ? Math.round(page.pageScore) : '--'}
                 </span>
                 <span className="text-[10px] opacity-50">
-                  {page.issues.length} issue{page.issues.length !== 1 ? 's' : ''}
+                  {page.issues.length} pb{page.issues.length !== 1 ? 's' : ''}
                 </span>
               </div>
             </button>
@@ -800,13 +861,13 @@ function PagesTab({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">
-                Issues ({selectedPageData.issues.length})
+                Probl\u00e8mes ({selectedPageData.issues.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {selectedPageData.issues.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  Aucune issue detectee sur cette page.
+                  Aucun probl\u00e8me d\u00e9tect\u00e9 sur cette page.
                 </p>
               ) : (
                 selectedPageData.issues.map((issue) => (
@@ -824,7 +885,7 @@ function PagesTab({
       ) : (
         <Card>
           <CardContent className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-            Selectionnez une page dans la liste.
+                  S\u00e9lectionnez une page dans la liste.
           </CardContent>
         </Card>
       )}
@@ -871,7 +932,7 @@ function RoadmapTab({
               <div className="flex-1">
                 <h3 className="text-sm font-semibold">{config.label}</h3>
                 <p className="text-xs text-muted-foreground">
-                  {groupIssues.length} issue{groupIssues.length !== 1 ? 's' : ''}
+                  {groupIssues.length} probl\u00e8me{groupIssues.length !== 1 ? 's' : ''}
                 </p>
               </div>
               {isOpen ? (
@@ -895,7 +956,7 @@ function RoadmapTab({
             {isOpen && groupIssues.length === 0 && (
               <CardContent className="pt-0">
                 <p className="py-4 text-center text-sm text-muted-foreground">
-                  Aucune issue dans cette categorie.
+                  Aucun probl\u00e8me dans cette cat\u00e9gorie.
                 </p>
               </CardContent>
             )}
@@ -949,16 +1010,16 @@ function IssueCard({
             <span className="text-sm font-medium truncate">{issue.title}</span>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Badge variant="secondary" className="text-[10px]">
+            <span className="inline-flex items-center rounded-md border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
               {CATEGORY_LABELS[issue.category as IssueCategory] ?? issue.category}
-            </Badge>
+            </span>
             {issue.framework && (
               <FrameworkBadge framework={issue.framework} />
             )}
             {effortConfig && (
-              <Badge variant="outline" className="text-[10px]">
+              <span className="inline-flex items-center rounded-md border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 {effortConfig.label}
-              </Badge>
+              </span>
             )}
           </div>
         </div>
@@ -990,8 +1051,8 @@ function IssueCard({
 
           {/* Meta grid */}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <MetaItem label="Referentiel" value={issue.framework} />
-            {issue.criterion && <MetaItem label="Critere" value={issue.criterion} />}
+            <MetaItem label="R\u00e9f\u00e9rentiel" value={issue.framework} />
+            {issue.criterion && <MetaItem label="Crit\u00e8re" value={issue.criterion} />}
             <MetaItem label="Impact" value={`${issue.impact}/10`} />
           </div>
 
@@ -1000,7 +1061,7 @@ function IssueCard({
             <div>
               <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <Code2 className="h-3 w-3" />
-                Code problematique
+                Code probl\u00e9matique
               </h4>
               <pre className="overflow-x-auto rounded-lg bg-black/80 p-3 text-xs text-green-400">
                 <code>{issue.codeSnippet}</code>
@@ -1013,7 +1074,7 @@ function IssueCard({
             <div>
               <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <Wrench className="h-3 w-3" />
-                Correction suggeree
+                Correction sugg\u00e9r\u00e9e
               </h4>
               <pre className="overflow-x-auto rounded-lg bg-black/80 p-3 text-xs text-blue-400">
                 <code>{issue.fixSnippet}</code>
@@ -1032,22 +1093,9 @@ function IssueCard({
 
 function FrameworkBadge({ framework }: { framework: string }) {
   const config = FRAMEWORK_CONFIG[framework];
-  if (!config) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-        <BookOpen className="h-2.5 w-2.5" />
-        {framework}
-      </span>
-    );
-  }
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium',
-      config.bg,
-      config.color,
-    )}>
-      <BookOpen className="h-2.5 w-2.5" />
-      {config.abbrev}
+    <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+      {config?.abbrev ?? framework}
     </span>
   );
 }
@@ -1064,10 +1112,8 @@ function MetaItem({ label, value }: { label: string; value: string }) {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 90) return '#5B3FD6';
-  if (score >= 75) return '#79AAE4';
-  if (score >= 50) return '#E78059';
-  if (score >= 25) return '#f97316';
+  if (score >= 80) return '#16a34a';
+  if (score >= 60) return '#f97316';
   return '#ef4444';
 }
 

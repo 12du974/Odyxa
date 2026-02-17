@@ -26,16 +26,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   NAVIGATION: Compass, DARK_PATTERNS: ShieldAlert,
 };
 
-const categoryColors: Record<string, string> = {
-  ACCESSIBILITY: 'from-odyxa-navy to-odyxa-purple',
-  PERFORMANCE: 'from-odyxa-coral to-[#f4a261]',
-  DESIGN_CONSISTENCY: 'from-odyxa-purple to-odyxa-perfume',
-  FORMS: 'from-green-500 to-emerald-500',
-  CONTENT: 'from-odyxa-perfume to-odyxa-cornflower',
-  SEO: 'from-odyxa-cornflower to-odyxa-purple',
-  NAVIGATION: 'from-teal-500 to-odyxa-cornflower',
-  DARK_PATTERNS: 'from-odyxa-coral to-red-500',
-};
+/* Pas de couleurs par categorie — interface sobre */
 
 export default function NewAuditPage() {
   const router = useRouter();
@@ -92,8 +83,8 @@ export default function NewAuditPage() {
           <div key={s.id} className="flex items-center gap-2 sm:gap-3 flex-1">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full transition-all shrink-0 ${
-                step > s.id ? 'bg-green-500 text-white' :
-                step === s.id ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' :
+                step > s.id ? 'bg-green-600 text-white' :
+                step === s.id ? 'bg-foreground text-background' :
                 'bg-muted text-muted-foreground'
               }`}>
                 {step > s.id ? <Check className="h-4 w-4 sm:h-5 sm:w-5" /> : <s.icon className="h-4 w-4 sm:h-5 sm:w-5" />}
@@ -104,7 +95,7 @@ export default function NewAuditPage() {
               </div>
             </div>
             {i < steps.length - 1 && (
-              <div className={`flex-1 h-px mx-2 sm:mx-4 ${step > s.id ? 'bg-green-500' : 'bg-border'}`} />
+              <div className={`flex-1 h-px mx-2 sm:mx-4 ${step > s.id ? 'bg-green-600' : 'bg-border'}`} />
             )}
           </div>
         ))}
@@ -151,7 +142,7 @@ export default function NewAuditPage() {
                   <Settings2 className="h-5 w-5 text-primary" />
                   Configuration du scan
                 </CardTitle>
-                <CardDescription>Ajustez les parametres</CardDescription>
+                <CardDescription>Ajustez les param\u00e8tres du scan</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -186,7 +177,7 @@ export default function NewAuditPage() {
                   <Rocket className="h-5 w-5 text-primary" />
                   Analyseurs
                 </CardTitle>
-                <CardDescription>Selectionnez les frameworks d audit</CardDescription>
+                <CardDescription>S\u00e9lectionnez les cat\u00e9gories d&rsquo;analyse</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -199,18 +190,18 @@ export default function NewAuditPage() {
                         onClick={() => toggleCategory(cat)}
                         className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-all ${
                           isSelected
-                            ? 'border-primary bg-primary/5 shadow-sm'
-                            : 'border-border hover:border-primary/30'
+                            ? 'border-foreground/20 bg-muted/50'
+                            : 'border-border hover:border-foreground/10'
                         }`}
                       >
-                        <div className={`rounded-lg bg-gradient-to-br ${categoryColors[cat]} p-2`}>
-                          <Icon className="h-4 w-4 text-white" />
+                        <div className="rounded-lg bg-muted p-2">
+                          <Icon className="h-4 w-4 text-muted-foreground" />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium">{CATEGORY_LABELS[cat]}</p>
                         </div>
                         <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${
-                          isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
+                          isSelected ? 'border-green-600 bg-green-600' : 'border-muted-foreground/30'
                         }`}>
                           {isSelected && <Check className="h-3 w-3 text-white" />}
                         </div>
@@ -255,7 +246,7 @@ export default function NewAuditPage() {
         ) : (
           <Button variant="gradient" size="lg" onClick={handleSubmit} disabled={loading || selectedCategories.length === 0}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
-            {loading ? 'Lancement...' : 'Lancer l audit'}
+            {loading ? 'Lancement...' : "Lancer l\u2019audit"}
           </Button>
         )}
       </div>

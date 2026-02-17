@@ -1,7 +1,6 @@
-import { chromium, type Browser } from 'playwright';
 import * as path from 'path';
 import * as fs from 'fs';
-import type { ScanConfig, Viewport } from '@/types';
+import type { ScanConfig } from '@/types';
 
 export interface PageData {
   url: string;
@@ -18,16 +17,118 @@ export async function crawlSite(
   onLog: (msg: string) => void,
   onProgress: (scanned: number, total: number) => void
 ): Promise<PageData[]> {
+  let usePlaywright = false;
+
+  try {
+    require.resolve('playwright');
+    usePlaywright = true;
+  } catch {
+    onLog('Playwright non disponible, utilisation du crawler HTTP.');
+  }
+
+  if (usePlaywright) {
+    try {
+      return await crawlWithPlaywright(startUrl, config, auditId, onLog, onProgress);
+    } catch (err) {
+      onLog(`Playwright a echoue (${err instanceof Error ? err.message : 'erreur'}), fallback HTTP.`);
+    }
+  }
+
+  return await crawlWithFetch(startUrl, config, auditId, onLog, onProgress);
+}
+
+async function crawlWithFetch(
+  startUrl: string,
+  config: ScanConfig,
+  auditId: string,
+  onLog: (msg: string) => void,
+  onProgress: (scanned: number, total: number) => void
+): Promise<PageData[]> {
   const pages: PageData[] = [];
   const visited = new Set<string>();
   const queue: { url: string; depth: number }[] = [{ url: startUrl, depth: 0 }];
   const baseUrl = new URL(startUrl);
 
-  const screenshotDir = path.join(process.cwd(), 'public', 'screenshots', auditId);
+  onLog('Debut du crawl HTTP (sans navigateur)...');
+
+  while (queue.length > 0 && pages.length < config.maxPages) {
+    const item = queue.shift()!;
+    const normalized = normalizeUrl(item.url);
+    if (visited.has(normalized)) continue;
+    visited.add(normalized);
+
+    onLog(`[${pages.length + 1}/${config.maxPages}] Fetch: ${item.url} (profondeur ${item.depth})`);
+    onProgress(pages.length, Math.min(queue.length + pages.length + 1, config.maxPages));
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const res = await fetch(item.url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; OdyxaBot/1.0; +https://odyxa.com)',
+          'Accept': 'text/html,application/xhtml+xml',
+        },
+        signal: controller.signal,
+        redirect: 'follow',
+      });
+      clearTimeout(timeout);
+
+      const html = await res.text();
+      const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+      const title = titleMatch ? titleMatch[1].trim() : null;
+
+      pages.push({
+        url: item.url,
+        title,
+        html,
+        statusCode: res.status,
+        screenshots: {},
+      });
+
+      if (item.depth < config.maxDepth) {
+        const links = extractLinks(html, baseUrl);
+        for (const link of links) {
+          if (!visited.has(normalizeUrl(link)) && pages.length + queue.length < config.maxPages) {
+            queue.push({ url: link, depth: item.depth + 1 });
+          }
+        }
+        onLog(`  -> ${links.length} liens internes trouves`);
+      }
+
+      if (config.delayBetweenRequests > 0) {
+        await new Promise((r) => setTimeout(r, config.delayBetweenRequests));
+      }
+    } catch (err) {
+      onLog(`  x Erreur: ${err instanceof Error ? err.message : 'Inconnue'}`);
+    }
+  }
+
+  onProgress(pages.length, pages.length);
+  onLog(`Crawl termine: ${pages.length} pages scannees`);
+  return pages;
+}
+
+async function crawlWithPlaywright(
+  startUrl: string,
+  config: ScanConfig,
+  auditId: string,
+  onLog: (msg: string) => void,
+  onProgress: (scanned: number, total: number) => void
+): Promise<PageData[]> {
+  const { chromium } = require('playwright');
+  const pages: PageData[] = [];
+  const visited = new Set<string>();
+  const queue: { url: string; depth: number }[] = [{ url: startUrl, depth: 0 }];
+  const baseUrl = new URL(startUrl);
+
+  const isWritable = canWriteDir(path.join(process.cwd(), 'public'));
+  const screenshotDir = isWritable
+    ? path.join(process.cwd(), 'public', 'screenshots', auditId)
+    : path.join('/tmp', 'screenshots', auditId);
   fs.mkdirSync(screenshotDir, { recursive: true });
 
-  let browser: Browser | null = null;
-
+  let browser = null;
   try {
     onLog('Lancement du navigateur headless Chromium...');
     browser = await chromium.launch({ headless: true });
@@ -47,7 +148,7 @@ export async function crawlSite(
         });
         const page = await ctx.newPage();
         let statusCode = 200;
-        page.on('response', (r) => {
+        page.on('response', (r: any) => {
           if (r.url() === item.url || r.url() === item.url + '/') statusCode = r.status();
         });
 
@@ -64,7 +165,9 @@ export async function crawlSite(
           const fname = `p${pages.length}-${vp.name}.png`;
           const fpath = path.join(screenshotDir, fname);
           await page.screenshot({ path: fpath, fullPage: true });
-          screenshots[vp.name] = `/screenshots/${auditId}/${fname}`;
+          screenshots[vp.name] = isWritable
+            ? `/screenshots/${auditId}/${fname}`
+            : fpath;
         }
 
         await ctx.close();
@@ -95,6 +198,15 @@ export async function crawlSite(
   }
 
   return pages;
+}
+
+function canWriteDir(dir: string): boolean {
+  try {
+    fs.accessSync(dir, fs.constants.W_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function extractLinks(html: string, baseUrl: URL): string[] {

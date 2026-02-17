@@ -39,8 +39,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ auditId: audit.id, projectId: project.id });
   } catch (err) {
-    console.error('Error creating audit:', err);
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('Error creating audit:', msg);
+    return NextResponse.json({ error: `Erreur: ${msg}` }, { status: 500 });
   }
 }
 

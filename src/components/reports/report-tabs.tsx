@@ -10,6 +10,7 @@ import {
   CATEGORY_LABELS,
   SEVERITY_LABELS,
   SEVERITY_ORDER,
+  FRAMEWORK_CONFIG,
   type IssueCategory,
   type Severity,
 } from '@/types';
@@ -30,6 +31,7 @@ import {
   Calendar,
   Code2,
   Wrench,
+  BookOpen,
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
@@ -114,6 +116,7 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
   const [activeTab, setActiveTab] = useState<TabId>('resume');
   const [severityFilter, setSeverityFilter] = useState<string>('ALL');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [frameworkFilter, setFrameworkFilter] = useState<string>('ALL');
   const [selectedPage, setSelectedPage] = useState<string>(pages[0]?.id ?? '');
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
   const [expandedRoadmap, setExpandedRoadmap] = useState<Set<string>>(new Set(['QUICK_WIN', 'MEDIUM', 'LONG_TERM']));
@@ -152,14 +155,32 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
     return Array.from(cats).sort();
   }, [issues]);
 
+  /* Available frameworks */
+  const availableFrameworks = useMemo(() => {
+    const fws = new Set(issues.map((i) => i.framework).filter(Boolean));
+    return Array.from(fws).sort();
+  }, [issues]);
+
+  /* Framework counts */
+  const frameworkCounts = useMemo(() => {
+    const counts: Record<string, number> = { ALL: issues.length };
+    for (const issue of issues) {
+      if (issue.framework) {
+        counts[issue.framework] = (counts[issue.framework] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [issues]);
+
   /* Filtered issues */
   const filteredIssues = useMemo(() => {
     return issues.filter((issue) => {
       if (severityFilter !== 'ALL' && issue.severity !== severityFilter) return false;
       if (categoryFilter !== 'ALL' && issue.category !== categoryFilter) return false;
+      if (frameworkFilter !== 'ALL' && issue.framework !== frameworkFilter) return false;
       return true;
     });
-  }, [issues, severityFilter, categoryFilter]);
+  }, [issues, severityFilter, categoryFilter, frameworkFilter]);
 
   /* Category stats */
   const categoryStats = useMemo(() => {
@@ -260,8 +281,12 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
           setSeverityFilter={setSeverityFilter}
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
+          frameworkFilter={frameworkFilter}
+          setFrameworkFilter={setFrameworkFilter}
           severityCounts={severityCounts}
           availableCategories={availableCategories}
+          availableFrameworks={availableFrameworks}
+          frameworkCounts={frameworkCounts}
           expandedIssues={expandedIssues}
           toggleIssue={toggleIssue}
         />
@@ -350,6 +375,49 @@ function ResumeTab({
         </Card>
       </div>
 
+      {/* Frameworks breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            R&eacute;f&eacute;rentiels &amp; Frameworks
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(
+              issues.reduce<Record<string, number>>((acc, issue) => {
+                if (issue.framework) acc[issue.framework] = (acc[issue.framework] || 0) + 1;
+                return acc;
+              }, {})
+            )
+              .sort((a, b) => b[1] - a[1])
+              .map(([fw, count]) => {
+                const config = FRAMEWORK_CONFIG[fw];
+                return (
+                  <div
+                    key={fw}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors',
+                      config ? config.bg : 'border-border bg-muted'
+                    )}
+                  >
+                    <BookOpen className={cn('h-3.5 w-3.5', config?.color ?? 'text-muted-foreground')} />
+                    <div>
+                      <p className={cn('text-xs font-medium', config?.color ?? 'text-foreground')}>
+                        {config?.label ?? fw}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {count} issue{count > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Top 5 issues */}
       <Card>
         <CardHeader>
@@ -437,8 +505,12 @@ function IssuesTab({
   setSeverityFilter,
   categoryFilter,
   setCategoryFilter,
+  frameworkFilter,
+  setFrameworkFilter,
   severityCounts,
   availableCategories,
+  availableFrameworks,
+  frameworkCounts,
   expandedIssues,
   toggleIssue,
 }: {
@@ -447,8 +519,12 @@ function IssuesTab({
   setSeverityFilter: (v: string) => void;
   categoryFilter: string;
   setCategoryFilter: (v: string) => void;
+  frameworkFilter: string;
+  setFrameworkFilter: (v: string) => void;
   severityCounts: Record<string, number>;
   availableCategories: string[];
+  availableFrameworks: string[];
+  frameworkCounts: Record<string, number>;
   expandedIssues: Set<string>;
   toggleIssue: (id: string) => void;
 }) {
@@ -462,8 +538,8 @@ function IssuesTab({
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Severity filters */}
+      <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
           {severityButtons.map((btn) => (
             <button
@@ -492,23 +568,66 @@ function IssuesTab({
           ))}
         </div>
 
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-        >
-          <option value="ALL">Toutes les categories</option>
-          {availableCategories.map((cat) => (
-            <option key={cat} value={cat}>
-              {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
-            </option>
-          ))}
-        </select>
+        {/* Framework filter pills */}
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
+            <BookOpen className="h-3.5 w-3.5" />
+            <span className="font-medium">Framework :</span>
+          </div>
+          <button
+            onClick={() => setFrameworkFilter('ALL')}
+            className={cn(
+              'inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-medium transition-all',
+              frameworkFilter === 'ALL'
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+            )}
+          >
+            Tous
+          </button>
+          {availableFrameworks.map((fw) => {
+            const config = FRAMEWORK_CONFIG[fw];
+            const isActive = frameworkFilter === fw;
+            return (
+              <button
+                key={fw}
+                onClick={() => setFrameworkFilter(fw)}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-medium transition-all',
+                  isActive && config
+                    ? `${config.bg} ${config.color}`
+                    : isActive
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+                )}
+              >
+                {config?.abbrev ?? fw}
+                <span className="tabular-nums opacity-60">({frameworkCounts[fw] ?? 0})</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Category dropdown */}
+        <div className="flex items-center gap-3">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+          >
+            <option value="ALL">Toutes les cat\u00e9gories</option>
+            {availableCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Count */}
       <p className="text-sm text-muted-foreground">
-        {filteredIssues.length} issue{filteredIssues.length !== 1 ? 's' : ''} trouvee{filteredIssues.length !== 1 ? 's' : ''}
+        {filteredIssues.length} issue{filteredIssues.length !== 1 ? 's' : ''} trouv\u00e9e{filteredIssues.length !== 1 ? 's' : ''}
       </p>
 
       {/* Issue list */}
@@ -516,7 +635,7 @@ function IssuesTab({
         {filteredIssues.length === 0 ? (
           <Card>
             <CardContent className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-              Aucune issue ne correspond aux filtres selectionnes.
+              Aucune issue ne correspond aux filtres s\u00e9lectionn\u00e9s.
             </CardContent>
           </Card>
         ) : (
@@ -829,10 +948,13 @@ function IssueCard({
             </Badge>
             <span className="text-sm font-medium truncate">{issue.title}</span>
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <Badge variant="secondary" className="text-[10px]">
               {CATEGORY_LABELS[issue.category as IssueCategory] ?? issue.category}
             </Badge>
+            {issue.framework && (
+              <FrameworkBadge framework={issue.framework} />
+            )}
             {effortConfig && (
               <Badge variant="outline" className="text-[10px]">
                 {effortConfig.label}
@@ -907,6 +1029,28 @@ function IssueCard({
 /* ================================================================== */
 /*  Helpers                                                            */
 /* ================================================================== */
+
+function FrameworkBadge({ framework }: { framework: string }) {
+  const config = FRAMEWORK_CONFIG[framework];
+  if (!config) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+        <BookOpen className="h-2.5 w-2.5" />
+        {framework}
+      </span>
+    );
+  }
+  return (
+    <span className={cn(
+      'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium',
+      config.bg,
+      config.color,
+    )}>
+      <BookOpen className="h-2.5 w-2.5" />
+      {config.abbrev}
+    </span>
+  );
+}
 
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (

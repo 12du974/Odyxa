@@ -128,6 +128,59 @@ export const CATEGORY_WEIGHTS: Record<IssueCategory, number> = {
   DARK_PATTERNS: 0.05,
 };
 
+export const FRAMEWORK_CONFIG: Record<string, { label: string; abbrev: string; color: string; bg: string }> = {
+  'WCAG 2.2': {
+    label: 'WCAG 2.2',
+    abbrev: 'WCAG',
+    color: 'text-blue-700 dark:text-blue-300',
+    bg: 'bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800',
+  },
+  'Core Web Vitals': {
+    label: 'Core Web Vitals',
+    abbrev: 'CWV',
+    color: 'text-green-700 dark:text-green-300',
+    bg: 'bg-green-100 dark:bg-green-900/40 border-green-200 dark:border-green-800',
+  },
+  'Design System Consistency': {
+    label: 'Design System',
+    abbrev: 'DSC',
+    color: 'text-purple-700 dark:text-purple-300',
+    bg: 'bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800',
+  },
+  'Standards Formulaires': {
+    label: 'Standards Formulaires',
+    abbrev: 'FORM',
+    color: 'text-emerald-700 dark:text-emerald-300',
+    bg: 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
+  },
+  'Standards de Contenu': {
+    label: 'Standards de Contenu',
+    abbrev: 'CONT',
+    color: 'text-amber-700 dark:text-amber-300',
+    bg: 'bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800',
+  },
+  'SEO Technique': {
+    label: 'SEO Technique',
+    abbrev: 'SEO',
+    color: 'text-cyan-700 dark:text-cyan-300',
+    bg: 'bg-cyan-100 dark:bg-cyan-900/40 border-cyan-200 dark:border-cyan-800',
+  },
+  "Architecture de l'Information": {
+    label: "Architecture de l'Info",
+    abbrev: 'IA',
+    color: 'text-teal-700 dark:text-teal-300',
+    bg: 'bg-teal-100 dark:bg-teal-900/40 border-teal-200 dark:border-teal-800',
+  },
+  'Dark Patterns Detection': {
+    label: 'Dark Patterns',
+    abbrev: 'DP',
+    color: 'text-rose-700 dark:text-rose-300',
+    bg: 'bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800',
+  },
+};
+
+export const ALL_FRAMEWORKS = Object.keys(FRAMEWORK_CONFIG);
+
 export const STATUS_CONFIG: Record<AuditStatus, { label: string; color: string; icon: string }> = {
   QUEUED: { label: 'En attente', color: 'bg-slate-500', icon: 'Clock' },
   CRAWLING: { label: 'Crawling', color: 'bg-blue-500', icon: 'Globe' },

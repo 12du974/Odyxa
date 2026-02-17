@@ -1,0 +1,937 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { ScoreGauge } from '@/components/charts/score-gauge';
+import { CategoryChart } from '@/components/charts/category-chart';
+import { SeverityChart } from '@/components/charts/severity-chart';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  CATEGORY_LABELS,
+  SEVERITY_LABELS,
+  SEVERITY_ORDER,
+  type IssueCategory,
+  type Severity,
+} from '@/types';
+import { cn } from '@/lib/utils';
+import {
+  LayoutDashboard,
+  Grid3X3,
+  AlertTriangle,
+  FileText,
+  Rocket,
+  ChevronDown,
+  ChevronRight,
+  Monitor,
+  Tablet,
+  Smartphone,
+  Zap,
+  Clock,
+  Calendar,
+  Code2,
+  Wrench,
+} from 'lucide-react';
+
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+
+interface IssueData {
+  id: string;
+  title: string;
+  description: string;
+  severity: string;
+  category: string;
+  framework: string;
+  criterion: string | null;
+  selector: string | null;
+  recommendation: string;
+  effortLevel: string;
+  impact: number;
+  codeSnippet: string | null;
+  fixSnippet: string | null;
+  pageAuditId: string | null;
+}
+
+interface PageData {
+  id: string;
+  url: string;
+  title: string | null;
+  pageScore: number | null;
+  statusCode: number | null;
+  screenshots: Record<string, string>;
+  performanceMetrics: Record<string, number>;
+  scoreBreakdown: Record<string, number>;
+  issues: IssueData[];
+}
+
+interface ReportTabsProps {
+  globalScore: number;
+  scoreBreakdown: Record<string, number>;
+  summary: string | null;
+  pages: PageData[];
+  issues: IssueData[];
+}
+
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
+
+type TabId = 'resume' | 'categories' | 'issues' | 'pages' | 'roadmap';
+
+const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
+  { id: 'resume', label: 'Resume', icon: LayoutDashboard },
+  { id: 'categories', label: 'Par Categorie', icon: Grid3X3 },
+  { id: 'issues', label: 'Issues', icon: AlertTriangle },
+  { id: 'pages', label: 'Par Page', icon: FileText },
+  { id: 'roadmap', label: 'Roadmap', icon: Rocket },
+];
+
+const SEVERITY_BADGE_MAP: Record<string, 'critical' | 'major' | 'minor' | 'suggestion'> = {
+  CRITICAL: 'critical',
+  MAJOR: 'major',
+  MINOR: 'minor',
+  SUGGESTION: 'suggestion',
+};
+
+const EFFORT_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
+  QUICK_WIN: { label: 'Quick Win', icon: Zap, color: 'text-green-500' },
+  MEDIUM: { label: 'Effort Moyen', icon: Clock, color: 'text-yellow-500' },
+  LONG_TERM: { label: 'Long Terme', icon: Calendar, color: 'text-orange-500' },
+};
+
+const VIEWPORT_OPTIONS = [
+  { key: 'desktop', label: 'Desktop', icon: Monitor },
+  { key: 'tablet', label: 'Tablette', icon: Tablet },
+  { key: 'mobile', label: 'Mobile', icon: Smartphone },
+] as const;
+
+/* ------------------------------------------------------------------ */
+/*  Main Component                                                     */
+/* ------------------------------------------------------------------ */
+
+export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues }: ReportTabsProps) {
+  const [activeTab, setActiveTab] = useState<TabId>('resume');
+  const [severityFilter, setSeverityFilter] = useState<string>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [selectedPage, setSelectedPage] = useState<string>(pages[0]?.id ?? '');
+  const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
+  const [expandedRoadmap, setExpandedRoadmap] = useState<Set<string>>(new Set(['QUICK_WIN', 'MEDIUM', 'LONG_TERM']));
+  const [viewport, setViewport] = useState<string>('desktop');
+
+  const toggleIssue = (id: string) => {
+    setExpandedIssues((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleRoadmap = (key: string) => {
+    setExpandedRoadmap((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  /* Severity counts */
+  const severityCounts = useMemo(() => {
+    const counts: Record<string, number> = { ALL: issues.length };
+    for (const issue of issues) {
+      counts[issue.severity] = (counts[issue.severity] || 0) + 1;
+    }
+    return counts;
+  }, [issues]);
+
+  /* Available categories */
+  const availableCategories = useMemo(() => {
+    const cats = new Set(issues.map((i) => i.category));
+    return Array.from(cats).sort();
+  }, [issues]);
+
+  /* Filtered issues */
+  const filteredIssues = useMemo(() => {
+    return issues.filter((issue) => {
+      if (severityFilter !== 'ALL' && issue.severity !== severityFilter) return false;
+      if (categoryFilter !== 'ALL' && issue.category !== categoryFilter) return false;
+      return true;
+    });
+  }, [issues, severityFilter, categoryFilter]);
+
+  /* Category stats */
+  const categoryStats = useMemo(() => {
+    const stats: Record<string, { score: number; issueCount: number }> = {};
+    for (const [cat, score] of Object.entries(scoreBreakdown)) {
+      stats[cat] = {
+        score: Math.round(score),
+        issueCount: issues.filter((i) => i.category === cat).length,
+      };
+    }
+    return stats;
+  }, [scoreBreakdown, issues]);
+
+  /* Top 5 issues by severity */
+  const topIssues = useMemo(() => {
+    return [...issues]
+      .sort((a, b) => {
+        const sa = SEVERITY_ORDER[a.severity as Severity] ?? 99;
+        const sb = SEVERITY_ORDER[b.severity as Severity] ?? 99;
+        if (sa !== sb) return sa - sb;
+        return b.impact - a.impact;
+      })
+      .slice(0, 5);
+  }, [issues]);
+
+  /* Selected page data */
+  const selectedPageData = useMemo(() => {
+    return pages.find((p) => p.id === selectedPage) ?? pages[0] ?? null;
+  }, [pages, selectedPage]);
+
+  /* Roadmap groups */
+  const roadmapGroups = useMemo(() => {
+    const groups: Record<string, IssueData[]> = {
+      QUICK_WIN: [],
+      MEDIUM: [],
+      LONG_TERM: [],
+    };
+    for (const issue of issues) {
+      const key = issue.effortLevel in groups ? issue.effortLevel : 'MEDIUM';
+      groups[key].push(issue);
+    }
+    for (const key of Object.keys(groups)) {
+      groups[key].sort((a, b) => {
+        const sa = SEVERITY_ORDER[a.severity as Severity] ?? 99;
+        const sb = SEVERITY_ORDER[b.severity as Severity] ?? 99;
+        return sa !== sb ? sa - sb : b.impact - a.impact;
+      });
+    }
+    return groups;
+  }, [issues]);
+
+  return (
+    <div className="space-y-6">
+      {/* Tab navigation */}
+      <div className="flex gap-1 overflow-x-auto rounded-xl bg-muted/50 p-1">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all',
+                isActive
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab content */}
+      {activeTab === 'resume' && (
+        <ResumeTab
+          globalScore={globalScore}
+          scoreBreakdown={scoreBreakdown}
+          summary={summary}
+          issues={issues}
+          topIssues={topIssues}
+          toggleIssue={toggleIssue}
+          expandedIssues={expandedIssues}
+        />
+      )}
+
+      {activeTab === 'categories' && (
+        <CategoriesTab scoreBreakdown={scoreBreakdown} categoryStats={categoryStats} />
+      )}
+
+      {activeTab === 'issues' && (
+        <IssuesTab
+          filteredIssues={filteredIssues}
+          severityFilter={severityFilter}
+          setSeverityFilter={setSeverityFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          severityCounts={severityCounts}
+          availableCategories={availableCategories}
+          expandedIssues={expandedIssues}
+          toggleIssue={toggleIssue}
+        />
+      )}
+
+      {activeTab === 'pages' && (
+        <PagesTab
+          pages={pages}
+          selectedPage={selectedPage}
+          setSelectedPage={setSelectedPage}
+          selectedPageData={selectedPageData}
+          viewport={viewport}
+          setViewport={setViewport}
+          expandedIssues={expandedIssues}
+          toggleIssue={toggleIssue}
+        />
+      )}
+
+      {activeTab === 'roadmap' && (
+        <RoadmapTab
+          roadmapGroups={roadmapGroups}
+          expandedRoadmap={expandedRoadmap}
+          toggleRoadmap={toggleRoadmap}
+          expandedIssues={expandedIssues}
+          toggleIssue={toggleIssue}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  RESUME TAB                                                         */
+/* ================================================================== */
+
+function ResumeTab({
+  globalScore,
+  scoreBreakdown,
+  summary,
+  issues,
+  topIssues,
+  toggleIssue,
+  expandedIssues,
+}: {
+  globalScore: number;
+  scoreBreakdown: Record<string, number>;
+  summary: string | null;
+  issues: IssueData[];
+  topIssues: IssueData[];
+  toggleIssue: (id: string) => void;
+  expandedIssues: Set<string>;
+}) {
+  return (
+    <div className="space-y-6">
+      {/* Score */}
+      <Card>
+        <CardContent className="flex flex-col items-center py-8">
+          <p className="mb-4 text-sm font-medium text-muted-foreground">Score Global</p>
+          <ScoreGauge score={globalScore} size={200} strokeWidth={12} />
+          {summary && (
+            <p className="mt-6 max-w-2xl text-center text-sm text-muted-foreground leading-relaxed">
+              {summary}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Charts */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Scores par Categorie</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CategoryChart scores={scoreBreakdown} type="bar" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Repartition par Severite</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SeverityChart issues={issues} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top 5 issues */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Top 5 Issues Prioritaires</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {topIssues.map((issue, idx) => (
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              index={idx + 1}
+              expanded={expandedIssues.has(issue.id)}
+              onToggle={() => toggleIssue(issue.id)}
+            />
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  CATEGORIES TAB                                                     */
+/* ================================================================== */
+
+function CategoriesTab({
+  scoreBreakdown,
+  categoryStats,
+}: {
+  scoreBreakdown: Record<string, number>;
+  categoryStats: Record<string, { score: number; issueCount: number }>;
+}) {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Vue Radar</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CategoryChart scores={scoreBreakdown} type="radar" />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Object.entries(categoryStats).map(([cat, stats]) => (
+          <Card key={cat} className="group hover:border-primary/30 transition-colors">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">
+                    {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.issueCount} issue{stats.issueCount !== 1 ? 's' : ''}
+                  </p>
+                </div>
+                <ScoreGauge score={stats.score} size={56} strokeWidth={4} animated={false} />
+              </div>
+              <div className="mt-3">
+                <div className="h-1.5 w-full rounded-full bg-muted">
+                  <div
+                    className="h-1.5 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${stats.score}%`,
+                      backgroundColor: getScoreColor(stats.score),
+                    }}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  ISSUES TAB                                                         */
+/* ================================================================== */
+
+function IssuesTab({
+  filteredIssues,
+  severityFilter,
+  setSeverityFilter,
+  categoryFilter,
+  setCategoryFilter,
+  severityCounts,
+  availableCategories,
+  expandedIssues,
+  toggleIssue,
+}: {
+  filteredIssues: IssueData[];
+  severityFilter: string;
+  setSeverityFilter: (v: string) => void;
+  categoryFilter: string;
+  setCategoryFilter: (v: string) => void;
+  severityCounts: Record<string, number>;
+  availableCategories: string[];
+  expandedIssues: Set<string>;
+  toggleIssue: (id: string) => void;
+}) {
+  const severityButtons: { key: string; label: string; variant: 'outline' | 'critical' | 'major' | 'minor' | 'suggestion' }[] = [
+    { key: 'ALL', label: 'Toutes', variant: 'outline' },
+    { key: 'CRITICAL', label: 'Critiques', variant: 'critical' },
+    { key: 'MAJOR', label: 'Majeures', variant: 'major' },
+    { key: 'MINOR', label: 'Mineures', variant: 'minor' },
+    { key: 'SUGGESTION', label: 'Suggestions', variant: 'suggestion' },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {severityButtons.map((btn) => (
+            <button
+              key={btn.key}
+              onClick={() => setSeverityFilter(btn.key)}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all',
+                severityFilter === btn.key
+                  ? btn.key === 'ALL'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : btn.key === 'CRITICAL'
+                      ? 'border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400'
+                      : btn.key === 'MAJOR'
+                        ? 'border-orange-500/50 bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                        : btn.key === 'MINOR'
+                          ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+                          : 'border-blue-500/50 bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                  : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+              )}
+            >
+              {btn.label}
+              <span className="tabular-nums opacity-70">
+                ({severityCounts[btn.key] ?? 0})
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value="ALL">Toutes les categories</option>
+          {availableCategories.map((cat) => (
+            <option key={cat} value={cat}>
+              {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Count */}
+      <p className="text-sm text-muted-foreground">
+        {filteredIssues.length} issue{filteredIssues.length !== 1 ? 's' : ''} trouvee{filteredIssues.length !== 1 ? 's' : ''}
+      </p>
+
+      {/* Issue list */}
+      <div className="space-y-2">
+        {filteredIssues.length === 0 ? (
+          <Card>
+            <CardContent className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+              Aucune issue ne correspond aux filtres selectionnes.
+            </CardContent>
+          </Card>
+        ) : (
+          filteredIssues.map((issue) => (
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              expanded={expandedIssues.has(issue.id)}
+              onToggle={() => toggleIssue(issue.id)}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  PAGES TAB                                                          */
+/* ================================================================== */
+
+function PagesTab({
+  pages,
+  selectedPage,
+  setSelectedPage,
+  selectedPageData,
+  viewport,
+  setViewport,
+  expandedIssues,
+  toggleIssue,
+}: {
+  pages: PageData[];
+  selectedPage: string;
+  setSelectedPage: (id: string) => void;
+  selectedPageData: PageData | null;
+  viewport: string;
+  setViewport: (v: string) => void;
+  expandedIssues: Set<string>;
+  toggleIssue: (id: string) => void;
+}) {
+  return (
+    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      {/* Sidebar */}
+      <Card className="lg:max-h-[calc(100vh-280px)] lg:overflow-y-auto">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">Pages ({pages.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1 p-3 pt-0">
+          {pages.map((page) => (
+            <button
+              key={page.id}
+              onClick={() => setSelectedPage(page.id)}
+              className={cn(
+                'flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-all',
+                selectedPage === page.id
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              )}
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">
+                  {page.title || extractPath(page.url)}
+                </p>
+                <p className="truncate text-xs opacity-60">
+                  {extractPath(page.url)}
+                </p>
+              </div>
+              <div className="ml-3 flex flex-col items-end gap-0.5 shrink-0">
+                <span
+                  className="text-xs font-bold tabular-nums"
+                  style={{ color: getScoreColor(page.pageScore ?? 0) }}
+                >
+                  {page.pageScore !== null ? Math.round(page.pageScore) : '--'}
+                </span>
+                <span className="text-[10px] opacity-50">
+                  {page.issues.length} issue{page.issues.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </button>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Detail */}
+      {selectedPageData ? (
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <h3 className="truncate text-lg font-semibold">
+                    {selectedPageData.title || extractPath(selectedPageData.url)}
+                  </h3>
+                  <a
+                    href={selectedPageData.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {selectedPageData.url}
+                  </a>
+                </div>
+                <div className="flex items-center gap-4">
+                  <ScoreGauge
+                    score={selectedPageData.pageScore ?? 0}
+                    size={64}
+                    strokeWidth={5}
+                    animated={false}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Viewport toggle + screenshot */}
+          {Object.keys(selectedPageData.screenshots).length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">Capture d&apos;ecran</CardTitle>
+                  <div className="flex gap-1 rounded-lg bg-muted p-0.5">
+                    {VIEWPORT_OPTIONS.map((vp) => {
+                      const VpIcon = vp.icon;
+                      return (
+                        <button
+                          key={vp.key}
+                          onClick={() => setViewport(vp.key)}
+                          className={cn(
+                            'rounded-md p-1.5 transition-all',
+                            viewport === vp.key
+                              ? 'bg-background text-foreground shadow-sm'
+                              : 'text-muted-foreground hover:text-foreground'
+                          )}
+                          title={vp.label}
+                        >
+                          <VpIcon className="h-4 w-4" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {selectedPageData.screenshots[viewport] ? (
+                  <div className="overflow-hidden rounded-lg border border-border">
+                    <img
+                      src={selectedPageData.screenshots[viewport]}
+                      alt={`Capture ${viewport}`}
+                      className="w-full"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
+                    Aucune capture pour ce viewport
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Page issues */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">
+                Issues ({selectedPageData.issues.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {selectedPageData.issues.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">
+                  Aucune issue detectee sur cette page.
+                </p>
+              ) : (
+                selectedPageData.issues.map((issue) => (
+                  <IssueCard
+                    key={issue.id}
+                    issue={issue}
+                    expanded={expandedIssues.has(issue.id)}
+                    onToggle={() => toggleIssue(issue.id)}
+                  />
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+            Selectionnez une page dans la liste.
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  ROADMAP TAB                                                        */
+/* ================================================================== */
+
+function RoadmapTab({
+  roadmapGroups,
+  expandedRoadmap,
+  toggleRoadmap,
+  expandedIssues,
+  toggleIssue,
+}: {
+  roadmapGroups: Record<string, IssueData[]>;
+  expandedRoadmap: Set<string>;
+  toggleRoadmap: (key: string) => void;
+  expandedIssues: Set<string>;
+  toggleIssue: (id: string) => void;
+}) {
+  const groupOrder = ['QUICK_WIN', 'MEDIUM', 'LONG_TERM'];
+
+  return (
+    <div className="space-y-4">
+      {groupOrder.map((key) => {
+        const config = EFFORT_CONFIG[key];
+        const groupIssues = roadmapGroups[key] ?? [];
+        const isOpen = expandedRoadmap.has(key);
+        const GroupIcon = config.icon;
+
+        return (
+          <Card key={key}>
+            <button
+              onClick={() => toggleRoadmap(key)}
+              className="flex w-full items-center gap-3 p-5 text-left"
+            >
+              <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg bg-muted', config.color)}>
+                <GroupIcon className="h-4 w-4" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold">{config.label}</h3>
+                <p className="text-xs text-muted-foreground">
+                  {groupIssues.length} issue{groupIssues.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+              {isOpen ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+            {isOpen && groupIssues.length > 0 && (
+              <CardContent className="space-y-2 pt-0">
+                {groupIssues.map((issue) => (
+                  <IssueCard
+                    key={issue.id}
+                    issue={issue}
+                    expanded={expandedIssues.has(issue.id)}
+                    onToggle={() => toggleIssue(issue.id)}
+                  />
+                ))}
+              </CardContent>
+            )}
+            {isOpen && groupIssues.length === 0 && (
+              <CardContent className="pt-0">
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  Aucune issue dans cette categorie.
+                </p>
+              </CardContent>
+            )}
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  ISSUE CARD                                                         */
+/* ================================================================== */
+
+function IssueCard({
+  issue,
+  index,
+  expanded,
+  onToggle,
+}: {
+  issue: IssueData;
+  index?: number;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const severityVariant = SEVERITY_BADGE_MAP[issue.severity] ?? 'outline';
+  const effortConfig = EFFORT_CONFIG[issue.effortLevel];
+
+  return (
+    <div
+      className={cn(
+        'rounded-lg border border-border transition-all',
+        expanded ? 'bg-muted/30' : 'hover:bg-muted/20'
+      )}
+    >
+      {/* Header row */}
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center gap-3 p-3 text-left"
+      >
+        {index !== undefined && (
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold tabular-nums text-muted-foreground">
+            {index}
+          </span>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={severityVariant}>
+              {SEVERITY_LABELS[issue.severity as Severity] ?? issue.severity}
+            </Badge>
+            <span className="text-sm font-medium truncate">{issue.title}</span>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="text-[10px]">
+              {CATEGORY_LABELS[issue.category as IssueCategory] ?? issue.category}
+            </Badge>
+            {effortConfig && (
+              <Badge variant="outline" className="text-[10px]">
+                {effortConfig.label}
+              </Badge>
+            )}
+          </div>
+        </div>
+        {expanded ? (
+          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+        ) : (
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+        )}
+      </button>
+
+      {/* Expanded content */}
+      {expanded && (
+        <div className="border-t border-border px-4 py-4 space-y-4">
+          {/* Description */}
+          <div>
+            <h4 className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Description
+            </h4>
+            <p className="text-sm leading-relaxed">{issue.description}</p>
+          </div>
+
+          {/* Recommendation */}
+          <div>
+            <h4 className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Recommandation
+            </h4>
+            <p className="text-sm leading-relaxed">{issue.recommendation}</p>
+          </div>
+
+          {/* Meta grid */}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <MetaItem label="Referentiel" value={issue.framework} />
+            {issue.criterion && <MetaItem label="Critere" value={issue.criterion} />}
+            <MetaItem label="Impact" value={`${issue.impact}/10`} />
+          </div>
+
+          {/* Code snippet */}
+          {issue.codeSnippet && (
+            <div>
+              <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <Code2 className="h-3 w-3" />
+                Code problematique
+              </h4>
+              <pre className="overflow-x-auto rounded-lg bg-black/80 p-3 text-xs text-green-400">
+                <code>{issue.codeSnippet}</code>
+              </pre>
+            </div>
+          )}
+
+          {/* Fix snippet */}
+          {issue.fixSnippet && (
+            <div>
+              <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <Wrench className="h-3 w-3" />
+                Correction suggeree
+              </h4>
+              <pre className="overflow-x-auto rounded-lg bg-black/80 p-3 text-xs text-blue-400">
+                <code>{issue.fixSnippet}</code>
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  Helpers                                                            */
+/* ================================================================== */
+
+function MetaItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border px-3 py-2">
+      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-0.5 text-sm font-medium">{value}</p>
+    </div>
+  );
+}
+
+function getScoreColor(score: number): string {
+  if (score >= 90) return '#5B3FD6';
+  if (score >= 75) return '#79AAE4';
+  if (score >= 50) return '#E78059';
+  if (score >= 25) return '#f97316';
+  return '#ef4444';
+}
+
+function extractPath(url: string): string {
+  try {
+    const u = new URL(url);
+    return u.pathname === '/' ? '/' : u.pathname;
+  } catch {
+    return url;
+  }
+}

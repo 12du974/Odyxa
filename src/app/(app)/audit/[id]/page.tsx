@@ -131,7 +131,7 @@ export default async function AuditReportPage({ params }: { params: { id: string
           </div>
           <div className="flex items-center gap-1.5">
             <AlertTriangle className="h-4 w-4" />
-            <span>{audit.issuesFound} probl\u00e8mes</span>
+            <span>{audit.issuesFound} problÃ¨mes</span>
           </div>
           {criticalCount > 0 && (
             <Badge variant="critical">{criticalCount} critiques</Badge>

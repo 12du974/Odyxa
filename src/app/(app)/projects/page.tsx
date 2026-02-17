@@ -88,8 +88,8 @@ export default async function ProjectsPage() {
                             <div>
                               <div className="flex items-center gap-2 text-sm">
                                 <span className="font-medium">
-                                  {audit.status === 'COMPLETED' ? 'Termin\u00e9' :
-                                   audit.status === 'FAILED' ? '\u00c9chou\u00e9' : 'En cours'}
+                                  {audit.status === 'COMPLETED' ? 'TerminÃ©' :
+                                   audit.status === 'FAILED' ? 'Ã‰chouÃ©' : 'En cours'}
                                 </span>
                                 {audit.globalScore !== null && (
                                   <span className={`text-xs font-semibold ${

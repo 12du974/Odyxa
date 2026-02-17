@@ -93,9 +93,9 @@ const FRAMEWORK_URLS: Record<string, string> = {
 type TabId = 'resume' | 'categories' | 'issues' | 'pages' | 'roadmap';
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'resume', label: 'R\u00e9sum\u00e9', icon: LayoutDashboard },
-  { id: 'categories', label: 'Cat\u00e9gories', icon: Grid3X3 },
-  { id: 'issues', label: 'Probl\u00e8mes', icon: AlertTriangle },
+  { id: 'resume', label: 'RÃ©sumÃ©', icon: LayoutDashboard },
+  { id: 'categories', label: 'CatÃ©gories', icon: Grid3X3 },
+  { id: 'issues', label: 'ProblÃ¨mes', icon: AlertTriangle },
   { id: 'pages', label: 'Par page', icon: FileText },
   { id: 'roadmap', label: 'Feuille de route', icon: Rocket },
 ];
@@ -109,7 +109,7 @@ const SEVERITY_BADGE_MAP: Record<string, 'critical' | 'major' | 'minor' | 'sugge
 
 const EFFORT_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   QUICK_WIN: { label: 'Gain rapide', icon: Zap, color: 'text-green-600' },
-  MEDIUM: { label: 'Effort mod\u00e9r\u00e9', icon: Clock, color: 'text-orange-500' },
+  MEDIUM: { label: 'Effort modÃ©rÃ©', icon: Clock, color: 'text-orange-500' },
   LONG_TERM: { label: 'Long terme', icon: Calendar, color: 'text-red-500' },
 };
 
@@ -334,16 +334,16 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
 /* ================================================================== */
 
 const NIELSEN_HEURISTICS = [
-  { id: 'visibility', label: 'Visibilit\u00e9 du statut', desc: 'Le syst\u00e8me informe l\u2019utilisateur de ce qui se passe' },
-  { id: 'match', label: 'Correspondance monde r\u00e9el', desc: 'Le langage est familier et logique pour l\u2019utilisateur' },
-  { id: 'control', label: 'Contr\u00f4le utilisateur', desc: 'L\u2019utilisateur peut annuler et revenir en arri\u00e8re' },
-  { id: 'consistency', label: 'Coh\u00e9rence et standards', desc: 'Les conventions de la plateforme sont respect\u00e9es' },
-  { id: 'error-prevention', label: 'Pr\u00e9vention des erreurs', desc: 'Le design emp\u00eache les erreurs avant qu\u2019elles surviennent' },
-  { id: 'recognition', label: 'Reconnaissance vs rappel', desc: 'L\u2019information est visible, pas \u00e0 m\u00e9moriser' },
-  { id: 'flexibility', label: 'Flexibilit\u00e9 et efficacit\u00e9', desc: 'Des raccourcis pour les utilisateurs exp\u00e9riment\u00e9s' },
-  { id: 'aesthetic', label: 'Esth\u00e9tique et minimalisme', desc: 'Pas d\u2019information superflue' },
-  { id: 'error-recovery', label: 'Aide \u00e0 la correction', desc: 'Les messages d\u2019erreur sont clairs et utiles' },
-  { id: 'help', label: 'Aide et documentation', desc: 'Une documentation accessible si n\u00e9cessaire' },
+  { id: 'visibility', label: 'VisibilitÃ© du statut', desc: 'Le systÃ¨me informe lu{2019}utilisateur de ce qui se passe' },
+  { id: 'match', label: 'Correspondance monde rÃ©el', desc: 'Le langage est familier et logique pour lu{2019}utilisateur' },
+  { id: 'control', label: 'ContrÃ´le utilisateur', desc: 'Lu{2019}utilisateur peut annuler et revenir en arriÃ¨re' },
+  { id: 'consistency', label: 'CohÃ©rence et standards', desc: 'Les conventions de la plateforme sont respectÃ©es' },
+  { id: 'error-prevention', label: 'PrÃ©vention des erreurs', desc: 'Le design empÃªche les erreurs avant quu{2019}elles surviennent' },
+  { id: 'recognition', label: 'Reconnaissance vs rappel', desc: 'Lu{2019}information est visible, pas Ã  mÃ©moriser' },
+  { id: 'flexibility', label: 'FlexibilitÃ© et efficacitÃ©', desc: 'Des raccourcis pour les utilisateurs expÃ©rimentÃ©s' },
+  { id: 'aesthetic', label: 'EsthÃ©tique et minimalisme', desc: 'Pas du{2019}information superflue' },
+  { id: 'error-recovery', label: 'Aide Ã  la correction', desc: 'Les messages du{2019}erreur sont clairs et utiles' },
+  { id: 'help', label: 'Aide et documentation', desc: 'Une documentation accessible si nÃ©cessaire' },
 ];
 
 function ResumeTab({
@@ -369,7 +369,7 @@ function ResumeTab({
 
   return (
     <div className="space-y-6">
-      {/* Header synth\u00e9tique */}
+      {/* Header synthÃ©tique */}
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -401,7 +401,7 @@ function ResumeTab({
                   </span>
                 )}
                 <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                  {issues.length} probl\u00e8me{issues.length !== 1 ? 's' : ''} au total
+                  {issues.length} problÃ¨me{issues.length !== 1 ? 's' : ''} au total
                 </span>
               </div>
             </div>
@@ -413,7 +413,7 @@ function ResumeTab({
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Scores par cat\u00e9gorie</CardTitle>
+            <CardTitle className="text-base">Scores par catÃ©gorie</CardTitle>
           </CardHeader>
           <CardContent>
             <CategoryChart scores={scoreBreakdown} type="bar" />
@@ -422,7 +422,7 @@ function ResumeTab({
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">R\u00e9partition par s\u00e9v\u00e9rit\u00e9</CardTitle>
+            <CardTitle className="text-base">RÃ©partition par sÃ©vÃ©ritÃ©</CardTitle>
           </CardHeader>
           <CardContent>
             <SeverityChart issues={issues} />
@@ -430,12 +430,12 @@ function ResumeTab({
         </Card>
       </div>
 
-      {/* R\u00e9f\u00e9rentiels — tags sobres */}
+      {/* RÃ©fÃ©rentiels — tags sobres */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-muted-foreground" />
-            R\u00e9f\u00e9rentiels
+            RÃ©fÃ©rentiels
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -472,7 +472,7 @@ function ResumeTab({
       {/* Heuristiques de Nielsen */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Crit\u00e8res de Jakob Nielsen</CardTitle>
+          <CardTitle className="text-base">CritÃ¨res de Jakob Nielsen</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -489,10 +489,10 @@ function ResumeTab({
         </CardContent>
       </Card>
 
-      {/* Top 5 probl\u00e8mes */}
+      {/* Top 5 problÃ¨mes */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Top 5 probl\u00e8mes prioritaires</CardTitle>
+          <CardTitle className="text-base">Top 5 problÃ¨mes prioritaires</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {topIssues.map((issue, idx) => (
@@ -544,7 +544,7 @@ function CategoriesTab({
                       {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {stats.issueCount} probl\u00e8me{stats.issueCount !== 1 ? 's' : ''}
+                      {stats.issueCount} problÃ¨me{stats.issueCount !== 1 ? 's' : ''}
                     </p>
                   </div>
                   <div className="flex flex-col items-center">
@@ -635,7 +635,7 @@ function IssuesTab({
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
             <BookOpen className="h-3.5 w-3.5" />
-            <span className="font-medium">R\u00e9f\u00e9rentiel :</span>
+            <span className="font-medium">RÃ©fÃ©rentiel :</span>
           </div>
           <button
             onClick={() => setFrameworkFilter('ALL')}
@@ -676,7 +676,7 @@ function IssuesTab({
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30"
           >
-            <option value="ALL">Toutes les cat\u00e9gories</option>
+            <option value="ALL">Toutes les catÃ©gories</option>
             {availableCategories.map((cat) => (
               <option key={cat} value={cat}>
                 {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
@@ -688,7 +688,7 @@ function IssuesTab({
 
       {/* Compteur */}
       <p className="text-sm text-muted-foreground">
-        {filteredIssues.length} probl\u00e8me{filteredIssues.length !== 1 ? 's' : ''} trouv\u00e9{filteredIssues.length !== 1 ? 's' : ''}
+        {filteredIssues.length} problÃ¨me{filteredIssues.length !== 1 ? 's' : ''} trouvÃ©{filteredIssues.length !== 1 ? 's' : ''}
       </p>
 
       {/* Issue list */}
@@ -696,7 +696,7 @@ function IssuesTab({
         {filteredIssues.length === 0 ? (
           <Card>
             <CardContent className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-              Aucune issue ne correspond aux filtres s\u00e9lectionn\u00e9s.
+              Aucune issue ne correspond aux filtres sÃ©lectionnÃ©s.
             </CardContent>
           </Card>
         ) : (
@@ -861,13 +861,13 @@ function PagesTab({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">
-                Probl\u00e8mes ({selectedPageData.issues.length})
+                ProblÃ¨mes ({selectedPageData.issues.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {selectedPageData.issues.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  Aucun probl\u00e8me d\u00e9tect\u00e9 sur cette page.
+                  Aucun problÃ¨me dÃ©tectÃ© sur cette page.
                 </p>
               ) : (
                 selectedPageData.issues.map((issue) => (
@@ -885,7 +885,7 @@ function PagesTab({
       ) : (
         <Card>
           <CardContent className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-                  S\u00e9lectionnez une page dans la liste.
+                  SÃ©lectionnez une page dans la liste.
           </CardContent>
         </Card>
       )}
@@ -932,7 +932,7 @@ function RoadmapTab({
               <div className="flex-1">
                 <h3 className="text-sm font-semibold">{config.label}</h3>
                 <p className="text-xs text-muted-foreground">
-                  {groupIssues.length} probl\u00e8me{groupIssues.length !== 1 ? 's' : ''}
+                  {groupIssues.length} problÃ¨me{groupIssues.length !== 1 ? 's' : ''}
                 </p>
               </div>
               {isOpen ? (
@@ -956,7 +956,7 @@ function RoadmapTab({
             {isOpen && groupIssues.length === 0 && (
               <CardContent className="pt-0">
                 <p className="py-4 text-center text-sm text-muted-foreground">
-                  Aucun probl\u00e8me dans cette cat\u00e9gorie.
+                  Aucun problÃ¨me dans cette catÃ©gorie.
                 </p>
               </CardContent>
             )}
@@ -1051,8 +1051,8 @@ function IssueCard({
 
           {/* Meta grid */}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <MetaItem label="R\u00e9f\u00e9rentiel" value={issue.framework} />
-            {issue.criterion && <MetaItem label="Crit\u00e8re" value={issue.criterion} />}
+            <MetaItem label="RÃ©fÃ©rentiel" value={issue.framework} />
+            {issue.criterion && <MetaItem label="CritÃ¨re" value={issue.criterion} />}
             <MetaItem label="Impact" value={`${issue.impact}/10`} />
           </div>
 
@@ -1061,7 +1061,7 @@ function IssueCard({
             <div>
               <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <Code2 className="h-3 w-3" />
-                Code probl\u00e9matique
+                Code problÃ©matique
               </h4>
               <pre className="overflow-x-auto rounded-lg bg-black/80 p-3 text-xs text-green-400">
                 <code>{issue.codeSnippet}</code>
@@ -1074,7 +1074,7 @@ function IssueCard({
             <div>
               <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <Wrench className="h-3 w-3" />
-                Correction sugg\u00e9r\u00e9e
+                Correction suggÃ©rÃ©e
               </h4>
               <pre className="overflow-x-auto rounded-lg bg-black/80 p-3 text-xs text-blue-400">
                 <code>{issue.fixSnippet}</code>

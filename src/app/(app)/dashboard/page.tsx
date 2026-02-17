@@ -36,9 +36,9 @@ const statusLabels: Record<string, string> = {
   CRAWLING: 'Crawling...',
   SCANNING: 'Scan...',
   ANALYZING: 'Analyse...',
-  COMPLETED: 'Termin\u00e9',
-  FAILED: '\u00c9chou\u00e9',
-  CANCELLED: 'Annul\u00e9',
+  COMPLETED: 'Terminé',
+  FAILED: 'Échoué',
+  CANCELLED: 'Annulé',
 };
 
 export const dynamic = 'force-dynamic';
@@ -86,28 +86,28 @@ export default async function DashboardPage() {
         <StatCard
           title="Score moyen"
           value={avgScore !== null ? `${avgScore}` : '--'}
-          subtitle={avgScore !== null ? (avgScore >= 70 ? 'Bonne sant\u00e9 UX' : 'Am\u00e9liorations n\u00e9cessaires') : 'Aucun audit'}
+          subtitle={avgScore !== null ? (avgScore >= 70 ? 'Bonne santé UX' : 'Améliorations nécessaires') : 'Aucun audit'}
           icon={<TrendingUp className="h-4 w-4" />}
           iconBg="bg-odyxa-navy/10 text-odyxa-purple"
         />
         <StatCard
           title="Projets"
           value={`${projectCount}`}
-          subtitle="Sites web audit\u00e9s"
+          subtitle="Sites web audités"
           icon={<Globe className="h-4 w-4" />}
           iconBg="bg-blue-500/10 text-blue-500"
         />
         <StatCard
-          title="Audits r\u00e9alis\u00e9s"
+          title="Audits réalisés"
           value={`${completedAudits.length}`}
           subtitle={`${audits.length - completedAudits.length} en cours`}
           icon={<CheckCircle2 className="h-4 w-4" />}
           iconBg="bg-green-500/10 text-green-500"
         />
         <StatCard
-          title="Probl\u00e8mes d\u00e9tect\u00e9s"
+          title="Problèmes détectés"
           value={`${totalIssues}`}
-          subtitle="\u00c0 travers tous les audits"
+          subtitle="À travers tous les audits"
           icon={<AlertTriangle className="h-4 w-4" />}
           iconBg="bg-orange-500/10 text-orange-500"
         />
@@ -116,9 +116,9 @@ export default async function DashboardPage() {
       {/* Recent Audits */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Audits r\u00e9cents</h2>
+          <h2 className="text-lg font-semibold">Audits récents</h2>
           {audits.length > 5 && (
-            <Link href="/reports" className="text-sm text-primary hover:underline flex items-center gap-1">
+            <Link href="/projects" className="text-sm text-primary hover:underline flex items-center gap-1">
               Voir tout <ArrowUpRight className="h-3 w-3" />
             </Link>
           )}
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">{audit.issuesFound}</p>
-                        <p className="text-xs text-muted-foreground">probl\u00e8mes</p>
+                        <p className="text-xs text-muted-foreground">problèmes</p>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground">

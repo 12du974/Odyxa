@@ -142,7 +142,7 @@ export default function NewAuditPage() {
                   <Settings2 className="h-5 w-5 text-primary" />
                   Configuration du scan
                 </CardTitle>
-                <CardDescription>Ajustez les param\u00e8tres du scan</CardDescription>
+                <CardDescription>Ajustez les paramÃ¨tres du scan</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -177,7 +177,7 @@ export default function NewAuditPage() {
                   <Rocket className="h-5 w-5 text-primary" />
                   Analyseurs
                 </CardTitle>
-                <CardDescription>S\u00e9lectionnez les cat\u00e9gories d&rsquo;analyse</CardDescription>
+                <CardDescription>SÃ©lectionnez les catÃ©gories d&rsquo;analyse</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -246,7 +246,7 @@ export default function NewAuditPage() {
         ) : (
           <Button variant="gradient" size="lg" onClick={handleSubmit} disabled={loading || selectedCategories.length === 0}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
-            {loading ? 'Lancement...' : "Lancer l\u2019audit"}
+            {loading ? 'Lancement...' : "Lancer lu{2019}audit"}
           </Button>
         )}
       </div>

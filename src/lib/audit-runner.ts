@@ -73,7 +73,7 @@ export async function runAudit(auditId: string, url: string, config: ScanConfig)
       }
 
       totalIssues += result.allIssues.length;
-      updateAuditState(auditId, { issuesFound: totalIssues });
+      updateAuditState(auditId, { issuesFound: totalIssues, pagesAnalyzed: i + 1 });
 
       for (const [cat, score] of Object.entries(result.scores)) {
         if (!catScores[cat]) catScores[cat] = [];

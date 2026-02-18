@@ -32,6 +32,7 @@ import {
   Code2,
   Wrench,
   BookOpen,
+  Brain,
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
@@ -130,6 +131,7 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
   const [frameworkFilter, setFrameworkFilter] = useState<string>('ALL');
   const [selectedPage, setSelectedPage] = useState<string>(pages[0]?.id ?? '');
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
+  const [nielsenFilter, setNielsenFilter] = useState<string>('ALL');
   const [expandedRoadmap, setExpandedRoadmap] = useState<Set<string>>(new Set(['QUICK_WIN', 'MEDIUM', 'LONG_TERM']));
   const [viewport, setViewport] = useState<string>('desktop');
 
@@ -183,15 +185,28 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
     return counts;
   }, [issues]);
 
+  /* Nielsen counts */
+  const nielsenCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const h of NIELSEN_HEURISTICS) {
+      counts[h.id] = issues.filter(i => h.categories.includes(i.category)).length;
+    }
+    return counts;
+  }, [issues]);
+
   /* Filtered issues */
   const filteredIssues = useMemo(() => {
     return issues.filter((issue) => {
       if (severityFilter !== 'ALL' && issue.severity !== severityFilter) return false;
       if (categoryFilter !== 'ALL' && issue.category !== categoryFilter) return false;
       if (frameworkFilter !== 'ALL' && issue.framework !== frameworkFilter) return false;
+      if (nielsenFilter !== 'ALL') {
+        const h = NIELSEN_HEURISTICS.find(n => n.id === nielsenFilter);
+        if (h && !h.categories.includes(issue.category)) return false;
+      }
       return true;
     });
-  }, [issues, severityFilter, categoryFilter, frameworkFilter]);
+  }, [issues, severityFilter, categoryFilter, frameworkFilter, nielsenFilter]);
 
   /* Category stats */
   const categoryStats = useMemo(() => {
@@ -278,6 +293,13 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
           topIssues={topIssues}
           toggleIssue={toggleIssue}
           expandedIssues={expandedIssues}
+          onNielsenClick={(hId) => {
+            setNielsenFilter(hId);
+            setSeverityFilter('ALL');
+            setCategoryFilter('ALL');
+            setFrameworkFilter('ALL');
+            setActiveTab('issues');
+          }}
         />
       )}
 
@@ -294,10 +316,13 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
           setCategoryFilter={setCategoryFilter}
           frameworkFilter={frameworkFilter}
           setFrameworkFilter={setFrameworkFilter}
+          nielsenFilter={nielsenFilter}
+          setNielsenFilter={setNielsenFilter}
           severityCounts={severityCounts}
           availableCategories={availableCategories}
           availableFrameworks={availableFrameworks}
           frameworkCounts={frameworkCounts}
+          nielsenCounts={nielsenCounts}
           expandedIssues={expandedIssues}
           toggleIssue={toggleIssue}
         />
@@ -311,6 +336,8 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
           selectedPageData={selectedPageData}
           viewport={viewport}
           setViewport={setViewport}
+          nielsenFilter={nielsenFilter}
+          setNielsenFilter={setNielsenFilter}
           expandedIssues={expandedIssues}
           toggleIssue={toggleIssue}
         />
@@ -356,6 +383,7 @@ function ResumeTab({
   topIssues,
   toggleIssue,
   expandedIssues,
+  onNielsenClick,
 }: {
   globalScore: number;
   scoreBreakdown: Record<string, number>;
@@ -364,6 +392,7 @@ function ResumeTab({
   topIssues: IssueData[];
   toggleIssue: (id: string) => void;
   expandedIssues: Set<string>;
+  onNielsenClick: (heuristicId: string) => void;
 }) {
   const criticalCount = issues.filter(i => i.severity === 'CRITICAL').length;
   const majorCount = issues.filter(i => i.severity === 'MAJOR').length;
@@ -486,7 +515,14 @@ function ResumeTab({
               const statusColor = score >= 80 ? 'bg-green-500' : score >= 60 ? 'bg-orange-400' : 'bg-red-500';
               const statusLabel = score >= 80 ? 'Conforme' : score >= 60 ? 'À surveiller' : 'Non conforme';
               return (
-                <div key={h.id} className="flex items-start gap-3 rounded-lg border border-border p-3">
+                <button
+                  key={h.id}
+                  onClick={() => relatedIssues.length > 0 && onNielsenClick(h.id)}
+                  className={cn(
+                    'flex items-start gap-3 rounded-lg border border-border p-3 text-left transition-all',
+                    relatedIssues.length > 0 ? 'cursor-pointer hover:border-foreground/20 hover:bg-muted/40' : 'cursor-default'
+                  )}
+                >
                   <span className={`mt-0.5 h-2.5 w-2.5 rounded-full shrink-0 ${statusColor}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
@@ -499,13 +535,14 @@ function ResumeTab({
                     {relatedIssues.length > 0 && (
                       <p className="mt-1 text-[10px] text-orange-600 dark:text-orange-400">
                         {relatedIssues.length} problème{relatedIssues.length > 1 ? 's' : ''} détecté{relatedIssues.length > 1 ? 's' : ''} — {statusLabel}
+                        <span className="ml-1 text-muted-foreground">→ voir</span>
                       </p>
                     )}
                     {relatedIssues.length === 0 && (
                       <p className="mt-1 text-[10px] text-green-600 dark:text-green-400">Conforme</p>
                     )}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -598,10 +635,13 @@ function IssuesTab({
   setCategoryFilter,
   frameworkFilter,
   setFrameworkFilter,
+  nielsenFilter,
+  setNielsenFilter,
   severityCounts,
   availableCategories,
   availableFrameworks,
   frameworkCounts,
+  nielsenCounts,
   expandedIssues,
   toggleIssue,
 }: {
@@ -612,10 +652,13 @@ function IssuesTab({
   setCategoryFilter: (v: string) => void;
   frameworkFilter: string;
   setFrameworkFilter: (v: string) => void;
+  nielsenFilter: string;
+  setNielsenFilter: (v: string) => void;
   severityCounts: Record<string, number>;
   availableCategories: string[];
   availableFrameworks: string[];
   frameworkCounts: Record<string, number>;
+  nielsenCounts: Record<string, number>;
   expandedIssues: Set<string>;
   toggleIssue: (id: string) => void;
 }) {
@@ -692,6 +735,45 @@ function IssuesTab({
           })}
         </div>
 
+        {/* Nielsen heuristic filter */}
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
+            <Brain className="h-3.5 w-3.5" />
+            <span className="font-medium">Nielsen :</span>
+          </div>
+          <button
+            onClick={() => setNielsenFilter('ALL')}
+            className={cn(
+              'inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-all',
+              nielsenFilter === 'ALL'
+                ? 'border-foreground/20 bg-muted text-foreground'
+                : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+            )}
+          >
+            Tous
+          </button>
+          {NIELSEN_HEURISTICS.map((h) => {
+            const isActive = nielsenFilter === h.id;
+            const count = nielsenCounts[h.id] ?? 0;
+            if (count === 0) return null;
+            return (
+              <button
+                key={h.id}
+                onClick={() => setNielsenFilter(h.id)}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-all',
+                  isActive
+                    ? 'border-foreground/20 bg-muted text-foreground'
+                    : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+                )}
+              >
+                {h.label}
+                <span className="tabular-nums opacity-60">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Category dropdown */}
         <div className="flex items-center gap-3">
           <select
@@ -748,6 +830,8 @@ function PagesTab({
   selectedPageData,
   viewport,
   setViewport,
+  nielsenFilter,
+  setNielsenFilter,
   expandedIssues,
   toggleIssue,
 }: {
@@ -757,9 +841,18 @@ function PagesTab({
   selectedPageData: PageData | null;
   viewport: string;
   setViewport: (v: string) => void;
+  nielsenFilter: string;
+  setNielsenFilter: (v: string) => void;
   expandedIssues: Set<string>;
   toggleIssue: (id: string) => void;
 }) {
+  const pageFilteredIssues = useMemo(() => {
+    if (!selectedPageData) return [];
+    if (nielsenFilter === 'ALL') return selectedPageData.issues;
+    const h = NIELSEN_HEURISTICS.find(n => n.id === nielsenFilter);
+    if (!h) return selectedPageData.issues;
+    return selectedPageData.issues.filter(i => h.categories.includes(i.category));
+  }, [selectedPageData, nielsenFilter]);
   return (
     <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
       {/* Sidebar */}
@@ -880,20 +973,63 @@ function PagesTab({
             </Card>
           )}
 
+          {/* Nielsen filter for page issues */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Brain className="h-3.5 w-3.5" />
+              <span className="font-medium">Nielsen :</span>
+            </div>
+            <button
+              onClick={() => setNielsenFilter('ALL')}
+              className={cn(
+                'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-medium transition-all',
+                nielsenFilter === 'ALL'
+                  ? 'border-foreground/20 bg-muted text-foreground'
+                  : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+              )}
+            >
+              Tous
+            </button>
+            {NIELSEN_HEURISTICS.map((h) => {
+              const count = selectedPageData?.issues.filter(i => h.categories.includes(i.category)).length ?? 0;
+              if (count === 0) return null;
+              return (
+                <button
+                  key={h.id}
+                  onClick={() => setNielsenFilter(h.id)}
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-medium transition-all',
+                    nielsenFilter === h.id
+                      ? 'border-foreground/20 bg-muted text-foreground'
+                      : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+                  )}
+                >
+                  {h.label}
+                  <span className="tabular-nums opacity-60">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+
           {/* Page issues */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">
-                Problèmes ({selectedPageData.issues.length})
+                Problèmes ({pageFilteredIssues.length})
+                {nielsenFilter !== 'ALL' && (
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                    — {NIELSEN_HEURISTICS.find(h => h.id === nielsenFilter)?.label}
+                  </span>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {selectedPageData.issues.length === 0 ? (
+              {pageFilteredIssues.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  Aucun problème détecté sur cette page.
+                  Aucun problème {nielsenFilter !== 'ALL' ? 'pour ce critère Nielsen' : 'détecté'} sur cette page.
                 </p>
               ) : (
-                selectedPageData.issues.map((issue) => (
+                pageFilteredIssues.map((issue) => (
                   <IssueCard
                     key={issue.id}
                     issue={issue}
@@ -1044,6 +1180,12 @@ function IssueCard({
                 {effortConfig.label}
               </span>
             )}
+            {NIELSEN_HEURISTICS.filter(h => h.categories.includes(issue.category)).map(h => (
+              <span key={h.id} className="inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                <Brain className="h-2.5 w-2.5" />
+                {h.label}
+              </span>
+            ))}
           </div>
         </div>
         {expanded ? (

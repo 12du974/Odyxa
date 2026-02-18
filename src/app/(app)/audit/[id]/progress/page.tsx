@@ -18,6 +18,7 @@ interface AuditState {
   status: string;
   pagesScanned: number;
   totalPages: number;
+  pagesAnalyzed: number;
   issuesFound: number;
   globalScore: number | null;
 }
@@ -58,9 +59,35 @@ export default function AuditProgressPage() {
     return () => clearInterval(interval);
   }, [auditId, router]);
 
-  const progressPercent = audit && audit.totalPages > 0
-    ? Math.round((audit.pagesScanned / audit.totalPages) * 100)
-    : 0;
+  const progressPercent = (() => {
+    if (!audit) return 0;
+    const s = audit.status;
+    if (s === 'COMPLETED') return 100;
+    if (s === 'FAILED') return 0;
+    if (s === 'QUEUED') return 0;
+    const total = audit.totalPages || 1;
+    if (s === 'CRAWLING') {
+      return Math.min(Math.round((audit.pagesScanned / Math.max(total, audit.pagesScanned + 1)) * 40), 39);
+    }
+    // ANALYZING or GENERATING_REPORT
+    const analyzeProgress = audit.pagesAnalyzed / total;
+    return Math.min(40 + Math.round(analyzeProgress * 58), 98);
+  })();
+
+  const phaseLabel = (() => {
+    if (!audit) return '';
+    const s = audit.status;
+    if (s === 'CRAWLING') {
+      return `Crawl : ${audit.pagesScanned} page${audit.pagesScanned > 1 ? 's' : ''} trouv\u00e9e${audit.pagesScanned > 1 ? 's' : ''}`;
+    }
+    if (s === 'ANALYZING' || s === 'SCANNING') {
+      const total = audit.totalPages || 0;
+      return `Analyse : ${audit.pagesAnalyzed}/${total} page${total > 1 ? 's' : ''}`;
+    }
+    if (s === 'COMPLETED') return 'Termin\u00e9';
+    if (s === 'FAILED') return '\u00c9chou\u00e9';
+    return '';
+  })();
 
   const status = audit ? statusConfig[audit.status] || statusConfig.QUEUED : statusConfig.QUEUED;
   const StatusIcon = status.icon;
@@ -101,10 +128,13 @@ export default function AuditProgressPage() {
             audit?.status === 'FAILED' ? 'bg-red-500' :
             'bg-gradient-to-r from-odyxa-navy to-odyxa-purple'
           } />
+          {phaseLabel && (
+            <p className="text-xs text-muted-foreground text-center">{phaseLabel}</p>
+          )}
 
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <MiniStat label="Pages" value={`${audit?.pagesScanned ?? 0} / ${audit?.totalPages ?? '?'}`} icon={Globe} />
-            <MiniStat label="Issues" value={`${audit?.issuesFound ?? 0}`} icon={AlertTriangle} />
+            <MiniStat label="Probl\u00e8mes" value={`${audit?.issuesFound ?? 0}`} icon={AlertTriangle} />
             <MiniStat label="Score" value={audit?.globalScore !== null && audit?.globalScore !== undefined ? `${Math.round(audit.globalScore)}` : '--'} icon={CheckCircle2} />
           </div>
         </CardContent>

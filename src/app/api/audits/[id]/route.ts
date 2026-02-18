@@ -28,6 +28,7 @@ export async function GET(
       status: state?.status || audit.status,
       pagesScanned: state?.pagesScanned ?? audit.pagesScanned,
       totalPages: state?.totalPages ?? audit.totalPages,
+      pagesAnalyzed: state?.pagesAnalyzed ?? 0,
       issuesFound: state?.issuesFound ?? audit.issuesFound,
       globalScore: audit.globalScore,
       project: audit.project,

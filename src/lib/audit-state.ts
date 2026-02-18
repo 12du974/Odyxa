@@ -3,6 +3,7 @@ interface AuditState {
   status: string;
   pagesScanned: number;
   totalPages: number;
+  pagesAnalyzed: number;
   issuesFound: number;
 }
 
@@ -13,7 +14,7 @@ export function getAuditState(id: string): AuditState | undefined {
 }
 
 export function initAuditState(id: string): AuditState {
-  const s: AuditState = { logs: [], status: 'QUEUED', pagesScanned: 0, totalPages: 0, issuesFound: 0 };
+  const s: AuditState = { logs: [], status: 'QUEUED', pagesScanned: 0, totalPages: 0, pagesAnalyzed: 0, issuesFound: 0 };
   states.set(id, s);
   return s;
 }

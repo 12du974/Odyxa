@@ -37,14 +37,14 @@ export function Sidebar() {
 
   const sidebarContent = (
     <>
-      {/* Logo Odyxa */}
+      {/* Logo Odixa */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg overflow-hidden">
-          <img src="/logo-odyxa.png" alt="Odyxa" className="h-9 w-9 object-contain" />
+          <img src="/logo-odixa.svg" alt="Odixa" className="h-9 w-9 object-contain" />
         </div>
         {!collapsed && (
           <div className="flex flex-col">
-            <span className="text-base font-bold tracking-tight">Odyxa</span>
+            <span className="text-base font-bold tracking-tight">Odixa</span>
             <span className="text-[10px] text-muted-foreground">Audit UI/UX</span>
           </div>
         )}
@@ -101,7 +101,7 @@ export function Sidebar() {
               <Icon className={cn('h-[18px] w-[18px] shrink-0', isActive && 'text-sidebar-primary')} />
               {!collapsed && <span>{item.label}</span>}
               {isActive && !collapsed && (
-                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-odyxa-coral" />
+                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-odixa-lime" />
               )}
             </Link>
           );

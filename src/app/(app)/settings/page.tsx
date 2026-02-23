@@ -14,7 +14,7 @@ export default function SettingsPage() {
     <div className="mx-auto max-w-3xl space-y-6 sm:space-y-8 animate-fade-in">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Param&egrave;tres</h1>
-        <p className="mt-1 text-sm sm:text-base text-muted-foreground">Configurez votre exp&eacute;rience Odyxa</p>
+        <p className="mt-1 text-sm sm:text-base text-muted-foreground">Configurez votre exp&eacute;rience Odixa</p>
       </div>
 
       {/* Profile */}
@@ -33,7 +33,7 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Email</label>
-              <Input type="email" placeholder="email@example.com" defaultValue="user@odyxa.com" />
+              <Input type="email" placeholder="email@example.com" defaultValue="user@odixa.com" />
             </div>
           </div>
           <Button size="sm">Sauvegarder</Button>

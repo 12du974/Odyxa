@@ -23,7 +23,7 @@ export function Header() {
       <div className="flex items-center gap-1.5 sm:gap-2">
         <Button variant="ghost" size="icon" className="relative h-9 w-9">
           <Bell className="h-4 w-4" />
-          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-odyxa-coral text-[10px] font-bold text-white flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-odixa-lime text-[10px] font-bold text-odixa-black flex items-center justify-center">
             3
           </span>
         </Button>
@@ -39,7 +39,7 @@ export function Header() {
         </Button>
 
         <div className="ml-1 sm:ml-2 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-odyxa-navy to-odyxa-purple flex items-center justify-center text-xs font-bold text-white">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-odixa-black to-odixa-purple flex items-center justify-center text-xs font-bold text-white">
             U
           </div>
         </div>

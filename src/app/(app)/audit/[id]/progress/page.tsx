@@ -27,8 +27,8 @@ const statusConfig: Record<string, { icon: React.ElementType; label: string; col
   QUEUED: { icon: Clock, label: "En file d'attente...", color: 'text-muted-foreground' },
   CRAWLING: { icon: Globe, label: 'Découverte des pages...', color: 'text-blue-500' },
   SCANNING: { icon: ScanSearch, label: 'Scan en cours...', color: 'text-blue-500' },
-  ANALYZING: { icon: Brain, label: 'Analyse en cours...', color: 'text-odyxa-purple' },
-  GENERATING_REPORT: { icon: FileText, label: 'Génération du rapport...', color: 'text-odyxa-purple' },
+  ANALYZING: { icon: Brain, label: 'Analyse en cours...', color: 'text-odixa-purple' },
+  GENERATING_REPORT: { icon: FileText, label: 'Génération du rapport...', color: 'text-odixa-purple' },
   COMPLETED: { icon: CheckCircle2, label: 'Audit terminé !', color: 'text-green-500' },
   FAILED: { icon: XCircle, label: 'Audit échoué', color: 'text-red-500' },
 };
@@ -126,7 +126,7 @@ export default function AuditProgressPage() {
           <Progress value={progressPercent} className="h-2" indicatorClassName={
             audit?.status === 'COMPLETED' ? 'bg-green-500' :
             audit?.status === 'FAILED' ? 'bg-red-500' :
-            'bg-gradient-to-r from-odyxa-navy to-odyxa-purple'
+            'bg-gradient-to-r from-odixa-lime to-odixa-purple'
           } />
           {phaseLabel && (
             <p className="text-xs text-muted-foreground text-center">{phaseLabel}</p>

@@ -19,8 +19,8 @@ export default function LandingPage() {
         <nav className="fixed top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
             <div className="flex items-center gap-2">
-              <img src="/logo-odyxa.png" alt="Odyxa" className="h-8 w-8 rounded-lg object-contain" />
-              <span className="text-lg font-bold">Odyxa</span>
+              <img src="/logo-odixa.svg" alt="Odixa" className="h-8 w-8 rounded-lg object-contain" />
+              <span className="text-lg font-bold">Odixa</span>
             </div>
             <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
               <a href="#features" className="hover:text-foreground transition-colors">Features</a>
@@ -68,12 +68,12 @@ export default function LandingPage() {
 
         {/* Hero */}
         <section className="relative overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-20">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(37,26,121,0.15),transparent)]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] bg-odyxa-navy/5 rounded-full blur-3xl" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(234,252,135,0.15),transparent)]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] bg-odixa-lime/10 rounded-full blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs sm:text-sm sm:px-4 text-muted-foreground mb-6 sm:mb-8">
-              <img src="/logo-odyxa.png" alt="" className="h-4 w-4" />
+              <img src="/logo-odixa.svg" alt="" className="h-4 w-4" />
               Propuls&eacute; par l&rsquo;IA et les standards internationaux
             </div>
 
@@ -110,21 +110,21 @@ export default function LandingPage() {
 
             {/* Mock dashboard */}
             <div className="relative mt-10 sm:mt-16 mx-auto max-w-5xl">
-              <div className="rounded-xl border border-border/50 bg-card shadow-2xl shadow-odyxa-navy/10 overflow-hidden">
+              <div className="rounded-xl border border-border/50 bg-card shadow-2xl shadow-odixa-black/10 overflow-hidden">
                 <div className="flex items-center gap-2 border-b border-border px-4 py-3">
                   <div className="h-3 w-3 rounded-full bg-red-400" />
                   <div className="h-3 w-3 rounded-full bg-yellow-400" />
                   <div className="h-3 w-3 rounded-full bg-green-400" />
-                  <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">app.odyxa.com/dashboard</span>
+                  <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">app.odixa.com/dashboard</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-6">
-                  <MockScoreCard label="Score Global" score={78} color="text-odyxa-purple" />
+                  <MockScoreCard label="Score Global" score={78} color="text-odixa-purple" />
                   <MockScoreCard label="Accessibilit&eacute;" score={85} color="text-green-500" />
-                  <MockScoreCard label="Performance" score={62} color="text-odyxa-coral" />
-                  <MockScoreCard label="SEO" score={91} color="text-odyxa-cornflower" />
+                  <MockScoreCard label="Performance" score={62} color="text-odixa-lime" />
+                  <MockScoreCard label="SEO" score={91} color="text-odixa-lavender" />
                 </div>
               </div>
-              <div className="absolute -inset-4 -z-10 rounded-2xl bg-gradient-to-r from-odyxa-navy/20 via-odyxa-purple/20 to-odyxa-coral/20 blur-2xl opacity-50" />
+              <div className="absolute -inset-4 -z-10 rounded-2xl bg-gradient-to-r from-odixa-lime/20 via-odixa-purple/20 to-odixa-lavender/20 blur-2xl opacity-50" />
             </div>
           </div>
         </section>
@@ -140,14 +140,14 @@ export default function LandingPage() {
             </div>
 
             <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              <FeatureCard icon={Eye} title="Accessibilit&eacute;" desc="WCAG 2.2 A/AA/AAA, axe-core, contrastes, ARIA, navigation clavier" color="from-odyxa-navy to-odyxa-purple" />
-              <FeatureCard icon={Zap} title="Performance" desc="Core Web Vitals, Lighthouse, lazy loading, render-blocking, poids ressources" color="from-odyxa-coral to-[#f4a261]" />
-              <FeatureCard icon={Palette} title="Design System" desc="Typo, couleurs, espacements, border-radius, coh&eacute;rence des composants" color="from-odyxa-purple to-odyxa-perfume" />
+              <FeatureCard icon={Eye} title="Accessibilit&eacute;" desc="WCAG 2.2 A/AA/AAA, axe-core, contrastes, ARIA, navigation clavier" color="from-odixa-black to-odixa-purple" />
+              <FeatureCard icon={Zap} title="Performance" desc="Core Web Vitals, Lighthouse, lazy loading, render-blocking, poids ressources" color="from-odixa-lime to-[#d4e157]" />
+              <FeatureCard icon={Palette} title="Design System" desc="Typo, couleurs, espacements, border-radius, coh&eacute;rence des composants" color="from-odixa-purple to-odixa-lavender" />
               <FeatureCard icon={Code} title="Formulaires" desc="Labels, validation, autocomplete, &eacute;tats visuels, champs obligatoires" color="from-green-500 to-emerald-500" />
-              <FeatureCard icon={Search} title="SEO Technique" desc="Title, meta, Open Graph, canonical, structured data, sitemap" color="from-odyxa-cornflower to-odyxa-purple" />
-              <FeatureCard icon={MonitorSmartphone} title="Responsive" desc="Screenshots 3 viewports, touch targets, overflow, meta viewport" color="from-odyxa-perfume to-odyxa-cornflower" />
-              <FeatureCard icon={Globe} title="Navigation" desc="Profondeur, liens cass&eacute;s, breadcrumbs, architecture de l&rsquo;information" color="from-teal-500 to-odyxa-cornflower" />
-              <FeatureCard icon={Shield} title="Dark Patterns" desc="D&eacute;tection des patterns trompeurs, confirmshaming, misdirection" color="from-odyxa-coral to-red-500" />
+              <FeatureCard icon={Search} title="SEO Technique" desc="Title, meta, Open Graph, canonical, structured data, sitemap" color="from-odixa-lavender to-odixa-purple" />
+              <FeatureCard icon={MonitorSmartphone} title="Responsive" desc="Screenshots 3 viewports, touch targets, overflow, meta viewport" color="from-odixa-purple to-odixa-lavender" />
+              <FeatureCard icon={Globe} title="Navigation" desc="Profondeur, liens cass&eacute;s, breadcrumbs, architecture de l&rsquo;information" color="from-teal-500 to-odixa-lime" />
+              <FeatureCard icon={Shield} title="Dark Patterns" desc="D&eacute;tection des patterns trompeurs, confirmshaming, misdirection" color="from-odixa-lime to-red-500" />
             </div>
           </div>
         </section>
@@ -185,7 +185,7 @@ export default function LandingPage() {
         <section className="py-16 sm:py-24 border-t border-border/50">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
             <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl gradient-text inline-block">
-              Pr&ecirc;t &agrave; transformer votre UX avec Odyxa ?
+              Pr&ecirc;t &agrave; transformer votre UX avec Odixa ?
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground">
               Lancez votre premier audit gratuit en 30 secondes. Aucune carte requise.
@@ -204,8 +204,8 @@ export default function LandingPage() {
         <footer className="border-t border-border py-6 sm:py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <img src="/logo-odyxa.png" alt="Odyxa" className="h-4 w-4" />
-              <span>Odyxa &copy; 2026</span>
+              <img src="/logo-odixa.svg" alt="Odixa" className="h-4 w-4" />
+              <span>Odixa &copy; 2026</span>
             </div>
             <div className="flex gap-6">
               <a href="#" className="hover:text-foreground transition-colors">Documentation</a>
@@ -246,7 +246,7 @@ function FeatureCard({ icon: Icon, title, desc, color }: { icon: React.ElementTy
 function StepCard({ step, title, desc }: { step: number; title: string; desc: string }) {
   return (
     <div className="relative rounded-xl border border-border bg-card p-6 sm:p-8 text-center">
-      <div className="mx-auto mb-3 sm:mb-4 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-gradient-to-br from-odyxa-navy to-odyxa-purple text-base sm:text-lg font-bold text-white">
+      <div className="mx-auto mb-3 sm:mb-4 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-gradient-to-br from-odixa-black to-odixa-purple text-base sm:text-lg font-bold text-white">
         {step}
       </div>
       <h3 className="text-base sm:text-lg font-semibold">{title}</h3>
@@ -266,7 +266,7 @@ function PricingCard({ name, price, desc, features, highlighted }: {
       highlighted ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10 md:scale-105' : 'border-border bg-card'
     }`}>
       {highlighted && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-odyxa-navy to-odyxa-coral px-4 py-1 text-xs font-bold text-white">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-odixa-black to-odixa-lime px-4 py-1 text-xs font-bold text-white">
           Populaire
         </div>
       )}

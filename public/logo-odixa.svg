@@ -1,0 +1,8 @@
+<svg viewBox="0 0 100 95" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Upper eyelid - thick semicircle arc -->
+  <path d="M 10 48 A 40 40 0 0 1 90 48 L 75 48 A 25 25 0 0 0 25 48 Z" fill="currentColor"/>
+  <!-- Eye ring - outer circle minus inner circle -->
+  <path d="M 50 92 A 30 30 0 1 1 50.01 92 Z M 50 77 A 15 15 0 1 0 50.01 77 Z" fill="currentColor" fill-rule="evenodd"/>
+  <!-- Pupil - small semicircle at top of inner ring -->
+  <path d="M 40 62 A 10 10 0 0 1 60 62 L 55 62 A 5 5 0 0 0 45 62 Z" fill="currentColor"/>
+</svg>

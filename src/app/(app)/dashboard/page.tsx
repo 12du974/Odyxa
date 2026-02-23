@@ -88,7 +88,7 @@ export default async function DashboardPage() {
           value={avgScore !== null ? `${avgScore}` : '--'}
           subtitle={avgScore !== null ? (avgScore >= 70 ? 'Bonne santé UX' : 'Améliorations nécessaires') : 'Aucun audit'}
           icon={<TrendingUp className="h-4 w-4" />}
-          iconBg="bg-odyxa-navy/10 text-odyxa-purple"
+          iconBg="bg-odixa-lime/10 text-odixa-purple"
         />
         <StatCard
           title="Projets"

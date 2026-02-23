@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Odyxa — Audit UI/UX Automatise',
-  description: 'Plateforme SaaS d\'audit automatise UI/UX pour sites web et webapps par Odyxa',
+  title: 'Odixa — Audit UI/UX Automatise',
+  description: 'Plateforme SaaS d\'audit automatise UI/UX pour sites web et webapps par Odixa',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

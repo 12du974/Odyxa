@@ -56,13 +56,12 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-        odyxa: {
-          navy: '#251A79',
-          purple: '#5B3FD6',
-          cornflower: '#79AAE4',
-          coral: '#E78059',
-          light: '#D7E4F8',
-          perfume: '#A594F9',
+        odixa: {
+          'butter-yellow': '#FDFBD6',
+          lime: '#EAFC87',
+          lavender: '#EEB5F7',
+          purple: '#BDB4FE',
+          black: '#141414',
         },
       },
       borderRadius: {

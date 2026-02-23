@@ -66,7 +66,7 @@ async function crawlWithFetch(
 
       const res = await fetch(item.url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; OdyxaBot/1.0; +https://odyxa.com)',
+          'User-Agent': 'Mozilla/5.0 (compatible; OdixaBot/1.0; +https://odixa.com)',
           'Accept': 'text/html,application/xhtml+xml',
         },
         signal: controller.signal,

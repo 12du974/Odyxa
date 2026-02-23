@@ -24,13 +24,13 @@ interface AuditState {
 }
 
 const statusConfig: Record<string, { icon: React.ElementType; label: string; color: string }> = {
-  QUEUED: { icon: Clock, label: 'En file d\u2019attente...', color: 'text-muted-foreground' },
-  CRAWLING: { icon: Globe, label: 'D\u00e9couverte des pages...', color: 'text-blue-500' },
+  QUEUED: { icon: Clock, label: "En file d'attente...", color: 'text-muted-foreground' },
+  CRAWLING: { icon: Globe, label: 'Découverte des pages...', color: 'text-blue-500' },
   SCANNING: { icon: ScanSearch, label: 'Scan en cours...', color: 'text-blue-500' },
   ANALYZING: { icon: Brain, label: 'Analyse en cours...', color: 'text-odyxa-purple' },
-  GENERATING_REPORT: { icon: FileText, label: 'G\u00e9n\u00e9ration du rapport...', color: 'text-odyxa-purple' },
-  COMPLETED: { icon: CheckCircle2, label: 'Audit termin\u00e9 !', color: 'text-green-500' },
-  FAILED: { icon: XCircle, label: 'Audit \u00e9chou\u00e9', color: 'text-red-500' },
+  GENERATING_REPORT: { icon: FileText, label: 'Génération du rapport...', color: 'text-odyxa-purple' },
+  COMPLETED: { icon: CheckCircle2, label: 'Audit terminé !', color: 'text-green-500' },
+  FAILED: { icon: XCircle, label: 'Audit échoué', color: 'text-red-500' },
 };
 
 export default function AuditProgressPage() {
@@ -78,14 +78,14 @@ export default function AuditProgressPage() {
     if (!audit) return '';
     const s = audit.status;
     if (s === 'CRAWLING') {
-      return `Crawl : ${audit.pagesScanned} page${audit.pagesScanned > 1 ? 's' : ''} trouv\u00e9e${audit.pagesScanned > 1 ? 's' : ''}`;
+      return `Crawl : ${audit.pagesScanned} page${audit.pagesScanned > 1 ? 's' : ''} trouvée${audit.pagesScanned > 1 ? 's' : ''}`;
     }
     if (s === 'ANALYZING' || s === 'SCANNING') {
       const total = audit.totalPages || 0;
       return `Analyse : ${audit.pagesAnalyzed}/${total} page${total > 1 ? 's' : ''}`;
     }
-    if (s === 'COMPLETED') return 'Termin\u00e9';
-    if (s === 'FAILED') return '\u00c9chou\u00e9';
+    if (s === 'COMPLETED') return 'Terminé';
+    if (s === 'FAILED') return 'Échoué';
     return '';
   })();
 
@@ -134,7 +134,7 @@ export default function AuditProgressPage() {
 
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <MiniStat label="Pages" value={`${audit?.pagesScanned ?? 0} / ${audit?.totalPages ?? '?'}`} icon={Globe} />
-            <MiniStat label="Probl\u00e8mes" value={`${audit?.issuesFound ?? 0}`} icon={AlertTriangle} />
+            <MiniStat label="Problèmes" value={`${audit?.issuesFound ?? 0}`} icon={AlertTriangle} />
             <MiniStat label="Score" value={audit?.globalScore !== null && audit?.globalScore !== undefined ? `${Math.round(audit.globalScore)}` : '--'} icon={CheckCircle2} />
           </div>
         </CardContent>

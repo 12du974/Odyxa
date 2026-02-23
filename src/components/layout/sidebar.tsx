@@ -13,9 +13,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/audit/new', icon: Plus, label: 'Nouvel Audit' },
   { href: '/projects', icon: FolderKanban, label: 'Rapports' },
-  { href: '/settings', icon: Settings, label: 'Param\u00e8tres' },
+  { href: '/settings', icon: Settings, label: 'Paramètres' },
 ];
 
 export function Sidebar() {
@@ -58,6 +57,31 @@ export function Sidebar() {
         </button>
       </div>
 
+      {/* Quick action — above nav */}
+      {!collapsed ? (
+        <div className="px-3 pt-3">
+          <Link href="/audit/new">
+            <Button variant="gradient" className="w-full" size="sm">
+              <Plus className="h-4 w-4" />
+              Lancer un audit
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="px-3 pt-3">
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Link href="/audit/new">
+                <Button variant="gradient" className="w-full p-2" size="sm">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Lancer un audit</TooltipContent>
+          </Tooltip>
+        </div>
+      )}
+
       {/* Nav */}
       <nav className="flex-1 space-y-1 p-3">
         {navItems.map((item) => {
@@ -95,17 +119,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Quick action */}
-      <div className="border-t border-sidebar-border p-3">
-        {!collapsed && (
-          <Link href="/audit/new">
-            <Button variant="gradient" className="w-full" size="sm">
-              <Plus className="h-4 w-4" />
-              Lancer un audit
-            </Button>
-          </Link>
-        )}
-      </div>
+      <div className="border-t border-sidebar-border p-3" />
     </>
   );
 

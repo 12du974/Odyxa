@@ -10,14 +10,12 @@ import {
   CATEGORY_LABELS,
   SEVERITY_LABELS,
   SEVERITY_ORDER,
-  FRAMEWORK_CONFIG,
   type IssueCategory,
   type Severity,
 } from '@/types';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
-  Grid3X3,
   AlertTriangle,
   FileText,
   Rocket,
@@ -31,8 +29,10 @@ import {
   Calendar,
   Code2,
   Wrench,
-  BookOpen,
   Brain,
+  Check,
+  Filter,
+  BookOpen,
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
@@ -80,24 +80,12 @@ interface ReportTabsProps {
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-const FRAMEWORK_URLS: Record<string, string> = {
-  'WCAG 2.2': 'https://www.w3.org/TR/WCAG22/',
-  'Core Web Vitals': 'https://web.dev/vitals/',
-  'Design System Consistency': 'https://designsystemchecklist.com/',
-  'Standards Formulaires': 'https://www.w3.org/WAI/tutorials/forms/',
-  'Standards de Contenu': 'https://www.w3.org/WAI/WCAG21/Understanding/reading-level.html',
-  'SEO Technique': 'https://developers.google.com/search/docs',
-  "Architecture de l'Information": 'https://www.nngroup.com/articles/ia-vs-navigation/',
-  'Dark Patterns Detection': 'https://www.deceptive.design/',
-};
-
-type TabId = 'resume' | 'categories' | 'issues' | 'pages' | 'roadmap';
+type TabId = 'resume' | 'issues' | 'pages' | 'roadmap';
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'resume', label: 'Résumé', icon: LayoutDashboard },
-  { id: 'categories', label: 'Catégories', icon: Grid3X3 },
-  { id: 'issues', label: 'Problèmes', icon: AlertTriangle },
   { id: 'pages', label: 'Par page', icon: FileText },
+  { id: 'issues', label: 'Problèmes', icon: AlertTriangle },
   { id: 'roadmap', label: 'Feuille de route', icon: Rocket },
 ];
 
@@ -128,12 +116,22 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
   const [activeTab, setActiveTab] = useState<TabId>('resume');
   const [severityFilter, setSeverityFilter] = useState<string>('ALL');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
-  const [frameworkFilter, setFrameworkFilter] = useState<string>('ALL');
   const [selectedPage, setSelectedPage] = useState<string>(pages[0]?.id ?? '');
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
   const [nielsenFilter, setNielsenFilter] = useState<string>('ALL');
-  const [expandedRoadmap, setExpandedRoadmap] = useState<Set<string>>(new Set(['QUICK_WIN', 'MEDIUM', 'LONG_TERM']));
+  const [expandedRoadmap, setExpandedRoadmap] = useState<Set<string>>(new Set());
   const [viewport, setViewport] = useState<string>('desktop');
+  const [correctedIssues, setCorrectedIssues] = useState<Set<string>>(new Set());
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const toggleCorrected = (id: string) => {
+    setCorrectedIssues((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const toggleIssue = (id: string) => {
     setExpandedIssues((prev) => {
@@ -168,23 +166,6 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
     return Array.from(cats).sort();
   }, [issues]);
 
-  /* Available frameworks */
-  const availableFrameworks = useMemo(() => {
-    const fws = new Set(issues.map((i) => i.framework).filter(Boolean));
-    return Array.from(fws).sort();
-  }, [issues]);
-
-  /* Framework counts */
-  const frameworkCounts = useMemo(() => {
-    const counts: Record<string, number> = { ALL: issues.length };
-    for (const issue of issues) {
-      if (issue.framework) {
-        counts[issue.framework] = (counts[issue.framework] || 0) + 1;
-      }
-    }
-    return counts;
-  }, [issues]);
-
   /* Nielsen counts */
   const nielsenCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -199,14 +180,13 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
     return issues.filter((issue) => {
       if (severityFilter !== 'ALL' && issue.severity !== severityFilter) return false;
       if (categoryFilter !== 'ALL' && issue.category !== categoryFilter) return false;
-      if (frameworkFilter !== 'ALL' && issue.framework !== frameworkFilter) return false;
       if (nielsenFilter !== 'ALL') {
         const h = NIELSEN_HEURISTICS.find(n => n.id === nielsenFilter);
         if (h && !h.categories.includes(issue.category)) return false;
       }
       return true;
     });
-  }, [issues, severityFilter, categoryFilter, frameworkFilter, nielsenFilter]);
+  }, [issues, severityFilter, categoryFilter, nielsenFilter]);
 
   /* Category stats */
   const categoryStats = useMemo(() => {
@@ -291,20 +271,18 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
           summary={summary}
           issues={issues}
           topIssues={topIssues}
+          categoryStats={categoryStats}
           toggleIssue={toggleIssue}
           expandedIssues={expandedIssues}
+          correctedIssues={correctedIssues}
+          toggleCorrected={toggleCorrected}
           onNielsenClick={(hId) => {
             setNielsenFilter(hId);
             setSeverityFilter('ALL');
             setCategoryFilter('ALL');
-            setFrameworkFilter('ALL');
             setActiveTab('issues');
           }}
         />
-      )}
-
-      {activeTab === 'categories' && (
-        <CategoriesTab scoreBreakdown={scoreBreakdown} categoryStats={categoryStats} />
       )}
 
       {activeTab === 'issues' && (
@@ -314,17 +292,17 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
           setSeverityFilter={setSeverityFilter}
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
-          frameworkFilter={frameworkFilter}
-          setFrameworkFilter={setFrameworkFilter}
           nielsenFilter={nielsenFilter}
           setNielsenFilter={setNielsenFilter}
           severityCounts={severityCounts}
           availableCategories={availableCategories}
-          availableFrameworks={availableFrameworks}
-          frameworkCounts={frameworkCounts}
           nielsenCounts={nielsenCounts}
           expandedIssues={expandedIssues}
           toggleIssue={toggleIssue}
+          correctedIssues={correctedIssues}
+          toggleCorrected={toggleCorrected}
+          filtersOpen={filtersOpen}
+          setFiltersOpen={setFiltersOpen}
         />
       )}
 
@@ -336,10 +314,21 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
           selectedPageData={selectedPageData}
           viewport={viewport}
           setViewport={setViewport}
+          severityFilter={severityFilter}
+          setSeverityFilter={setSeverityFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
           nielsenFilter={nielsenFilter}
           setNielsenFilter={setNielsenFilter}
+          severityCounts={severityCounts}
+          availableCategories={availableCategories}
+          nielsenCounts={nielsenCounts}
           expandedIssues={expandedIssues}
           toggleIssue={toggleIssue}
+          correctedIssues={correctedIssues}
+          toggleCorrected={toggleCorrected}
+          filtersOpen={filtersOpen}
+          setFiltersOpen={setFiltersOpen}
         />
       )}
 
@@ -350,6 +339,8 @@ export function ReportTabs({ globalScore, scoreBreakdown, summary, pages, issues
           toggleRoadmap={toggleRoadmap}
           expandedIssues={expandedIssues}
           toggleIssue={toggleIssue}
+          correctedIssues={correctedIssues}
+          toggleCorrected={toggleCorrected}
         />
       )}
     </div>
@@ -381,8 +372,11 @@ function ResumeTab({
   summary,
   issues,
   topIssues,
+  categoryStats,
   toggleIssue,
   expandedIssues,
+  correctedIssues,
+  toggleCorrected,
   onNielsenClick,
 }: {
   globalScore: number;
@@ -390,8 +384,11 @@ function ResumeTab({
   summary: string | null;
   issues: IssueData[];
   topIssues: IssueData[];
+  categoryStats: Record<string, { score: number; issueCount: number }>;
   toggleIssue: (id: string) => void;
   expandedIssues: Set<string>;
+  correctedIssues: Set<string>;
+  toggleCorrected: (id: string) => void;
   onNielsenClick: (heuristicId: string) => void;
 }) {
   const criticalCount = issues.filter(i => i.severity === 'CRITICAL').length;
@@ -440,7 +437,7 @@ function ResumeTab({
         </CardContent>
       </Card>
 
-      {/* Charts */}
+      {/* Charts + Catégories fusionnées */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -461,44 +458,43 @@ function ResumeTab({
         </Card>
       </div>
 
-      {/* Référentiels — tags sobres */}
+      {/* Vue radar + grille catégories (fusionnée) */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-            Référentiels
-          </CardTitle>
+          <CardTitle className="text-base">Vue radar</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(
-              issues.reduce<Record<string, number>>((acc, issue) => {
-                if (issue.framework) acc[issue.framework] = (acc[issue.framework] || 0) + 1;
-                return acc;
-              }, {})
-            )
-              .sort((a, b) => b[1] - a[1])
-              .map(([fw, count]) => {
-                const config = FRAMEWORK_CONFIG[fw];
-                const fwUrl = FRAMEWORK_URLS[fw];
-                const tag = (
-                  <span
-                    key={fw}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground"
-                  >
-                    {config?.label ?? fw}
-                    <span className="text-muted-foreground">({count})</span>
-                  </span>
-                );
-                return fwUrl ? (
-                  <a key={fw} href={fwUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-                    {tag}
-                  </a>
-                ) : tag;
-              })}
-          </div>
+          <CategoryChart scores={scoreBreakdown} type="radar" />
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Object.entries(categoryStats).map(([cat, stats]) => {
+          const scoreColor = stats.score >= 80 ? 'text-green-600' : stats.score >= 60 ? 'text-orange-500' : 'text-red-500';
+          return (
+            <Card key={cat} className="group hover:border-primary/30 transition-colors">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">
+                      {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {stats.issueCount} problème{stats.issueCount !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className={cn('text-lg font-bold tabular-nums', scoreColor)}>
+                      {stats.score}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">/100</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
       {/* Heuristiques de Nielsen */}
       <Card>
@@ -562,63 +558,12 @@ function ResumeTab({
               index={idx + 1}
               expanded={expandedIssues.has(issue.id)}
               onToggle={() => toggleIssue(issue.id)}
+              corrected={correctedIssues.has(issue.id)}
+              onToggleCorrected={() => toggleCorrected(issue.id)}
             />
           ))}
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-/* ================================================================== */
-/*  CATEGORIES TAB                                                     */
-/* ================================================================== */
-
-function CategoriesTab({
-  scoreBreakdown,
-  categoryStats,
-}: {
-  scoreBreakdown: Record<string, number>;
-  categoryStats: Record<string, { score: number; issueCount: number }>;
-}) {
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Vue radar</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CategoryChart scores={scoreBreakdown} type="radar" />
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {Object.entries(categoryStats).map(([cat, stats]) => {
-          const scoreColor = stats.score >= 80 ? 'text-green-600' : stats.score >= 60 ? 'text-orange-500' : 'text-red-500';
-          return (
-            <Card key={cat} className="group hover:border-primary/30 transition-colors">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">
-                      {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {stats.issueCount} problème{stats.issueCount !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <span className={cn('text-lg font-bold tabular-nums', scoreColor)}>
-                      {stats.score}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">/100</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
     </div>
   );
 }
@@ -633,36 +578,36 @@ function IssuesTab({
   setSeverityFilter,
   categoryFilter,
   setCategoryFilter,
-  frameworkFilter,
-  setFrameworkFilter,
   nielsenFilter,
   setNielsenFilter,
   severityCounts,
   availableCategories,
-  availableFrameworks,
-  frameworkCounts,
   nielsenCounts,
   expandedIssues,
   toggleIssue,
+  correctedIssues,
+  toggleCorrected,
+  filtersOpen,
+  setFiltersOpen,
 }: {
   filteredIssues: IssueData[];
   severityFilter: string;
   setSeverityFilter: (v: string) => void;
   categoryFilter: string;
   setCategoryFilter: (v: string) => void;
-  frameworkFilter: string;
-  setFrameworkFilter: (v: string) => void;
   nielsenFilter: string;
   setNielsenFilter: (v: string) => void;
   severityCounts: Record<string, number>;
   availableCategories: string[];
-  availableFrameworks: string[];
-  frameworkCounts: Record<string, number>;
   nielsenCounts: Record<string, number>;
   expandedIssues: Set<string>;
   toggleIssue: (id: string) => void;
+  correctedIssues: Set<string>;
+  toggleCorrected: (id: string) => void;
+  filtersOpen: boolean;
+  setFiltersOpen: (v: boolean) => void;
 }) {
-  const severityButtons: { key: string; label: string }[] = [
+  const severityOptions = [
     { key: 'ALL', label: 'Tous' },
     { key: 'CRITICAL', label: 'Critiques' },
     { key: 'MAJOR', label: 'Majeurs' },
@@ -672,123 +617,63 @@ function IssuesTab({
 
   return (
     <div className="space-y-4">
-      {/* Severity filters */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap gap-2">
-          {severityButtons.map((btn) => {
-            const isActive = severityFilter === btn.key;
-            const activeColor =
-              btn.key === 'CRITICAL' ? 'border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300' :
-              btn.key === 'MAJOR' ? 'border-orange-300 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300' :
-              'border-foreground/20 bg-muted text-foreground';
-            return (
-              <button
-                key={btn.key}
-                onClick={() => setSeverityFilter(btn.key)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-all',
-                  isActive ? activeColor : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-                )}
+      {/* Filtres repliables + sélecteurs compacts */}
+      <div className="rounded-lg border border-border overflow-hidden">
+        <button
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-sm font-medium hover:bg-muted/50 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            Filtres
+          </span>
+          {filtersOpen ? (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          )}
+        </button>
+        {filtersOpen && (
+          <div className="border-t border-border p-4 space-y-3 bg-muted/20">
+            <div className="flex flex-wrap gap-3 items-center">
+              <select
+                value={severityFilter}
+                onChange={(e) => setSeverityFilter(e.target.value)}
+                className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30 min-w-[120px]"
               >
-                {btn.label}
-                <span className="tabular-nums opacity-70">({severityCounts[btn.key] ?? 0})</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Framework filter pills — tags sobres */}
-        <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
-            <BookOpen className="h-3.5 w-3.5" />
-            <span className="font-medium">Référentiel :</span>
+                {severityOptions.map((opt) => (
+                  <option key={opt.key} value={opt.key}>
+                    {opt.label} ({severityCounts[opt.key] ?? 0})
+                  </option>
+                ))}
+              </select>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30 min-w-[140px]"
+              >
+                <option value="ALL">Toutes catégories</option>
+                {availableCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={nielsenFilter}
+                onChange={(e) => setNielsenFilter(e.target.value)}
+                className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30 min-w-[140px]"
+              >
+                <option value="ALL">Tous Nielsen</option>
+                {NIELSEN_HEURISTICS.filter((h) => (nielsenCounts[h.id] ?? 0) > 0).map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {h.label} ({nielsenCounts[h.id] ?? 0})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <button
-            onClick={() => setFrameworkFilter('ALL')}
-            className={cn(
-              'inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-all',
-              frameworkFilter === 'ALL'
-                ? 'border-foreground/20 bg-muted text-foreground'
-                : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-            )}
-          >
-            Tous
-          </button>
-          {availableFrameworks.map((fw) => {
-            const config = FRAMEWORK_CONFIG[fw];
-            const isActive = frameworkFilter === fw;
-            return (
-              <button
-                key={fw}
-                onClick={() => setFrameworkFilter(fw)}
-                className={cn(
-                  'inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-all',
-                  isActive
-                    ? 'border-foreground/20 bg-muted text-foreground'
-                    : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-                )}
-              >
-                {config?.abbrev ?? fw}
-                <span className="tabular-nums opacity-60">({frameworkCounts[fw] ?? 0})</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Nielsen heuristic filter */}
-        <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
-            <Brain className="h-3.5 w-3.5" />
-            <span className="font-medium">Nielsen :</span>
-          </div>
-          <button
-            onClick={() => setNielsenFilter('ALL')}
-            className={cn(
-              'inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-all',
-              nielsenFilter === 'ALL'
-                ? 'border-foreground/20 bg-muted text-foreground'
-                : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-            )}
-          >
-            Tous
-          </button>
-          {NIELSEN_HEURISTICS.map((h) => {
-            const isActive = nielsenFilter === h.id;
-            const count = nielsenCounts[h.id] ?? 0;
-            if (count === 0) return null;
-            return (
-              <button
-                key={h.id}
-                onClick={() => setNielsenFilter(h.id)}
-                className={cn(
-                  'inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-all',
-                  isActive
-                    ? 'border-foreground/20 bg-muted text-foreground'
-                    : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-                )}
-              >
-                {h.label}
-                <span className="tabular-nums opacity-60">({count})</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Category dropdown */}
-        <div className="flex items-center gap-3">
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-          >
-            <option value="ALL">Toutes les catégories</option>
-            {availableCategories.map((cat) => (
-              <option key={cat} value={cat}>
-                {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
-              </option>
-            ))}
-          </select>
-        </div>
+        )}
       </div>
 
       {/* Compteur */}
@@ -811,6 +696,8 @@ function IssuesTab({
               issue={issue}
               expanded={expandedIssues.has(issue.id)}
               onToggle={() => toggleIssue(issue.id)}
+              corrected={correctedIssues.has(issue.id)}
+              onToggleCorrected={() => toggleCorrected(issue.id)}
             />
           ))
         )}
@@ -830,10 +717,21 @@ function PagesTab({
   selectedPageData,
   viewport,
   setViewport,
+  severityFilter,
+  setSeverityFilter,
+  categoryFilter,
+  setCategoryFilter,
   nielsenFilter,
   setNielsenFilter,
+  severityCounts,
+  availableCategories,
+  nielsenCounts,
   expandedIssues,
   toggleIssue,
+  correctedIssues,
+  toggleCorrected,
+  filtersOpen,
+  setFiltersOpen,
 }: {
   pages: PageData[];
   selectedPage: string;
@@ -841,18 +739,70 @@ function PagesTab({
   selectedPageData: PageData | null;
   viewport: string;
   setViewport: (v: string) => void;
+  severityFilter: string;
+  setSeverityFilter: (v: string) => void;
+  categoryFilter: string;
+  setCategoryFilter: (v: string) => void;
   nielsenFilter: string;
   setNielsenFilter: (v: string) => void;
+  severityCounts: Record<string, number>;
+  availableCategories: string[];
+  nielsenCounts: Record<string, number>;
   expandedIssues: Set<string>;
   toggleIssue: (id: string) => void;
+  correctedIssues: Set<string>;
+  toggleCorrected: (id: string) => void;
+  filtersOpen: boolean;
+  setFiltersOpen: (v: boolean) => void;
 }) {
+  const severityOptions = [
+    { key: 'ALL', label: 'Tous' },
+    { key: 'CRITICAL', label: 'Critiques' },
+    { key: 'MAJOR', label: 'Majeurs' },
+    { key: 'MINOR', label: 'Mineurs' },
+    { key: 'SUGGESTION', label: 'Suggestions' },
+  ];
+
   const pageFilteredIssues = useMemo(() => {
     if (!selectedPageData) return [];
-    if (nielsenFilter === 'ALL') return selectedPageData.issues;
-    const h = NIELSEN_HEURISTICS.find(n => n.id === nielsenFilter);
-    if (!h) return selectedPageData.issues;
-    return selectedPageData.issues.filter(i => h.categories.includes(i.category));
-  }, [selectedPageData, nielsenFilter]);
+    return selectedPageData.issues.filter((issue) => {
+      if (severityFilter !== 'ALL' && issue.severity !== severityFilter) return false;
+      if (categoryFilter !== 'ALL' && issue.category !== categoryFilter) return false;
+      if (nielsenFilter !== 'ALL') {
+        const h = NIELSEN_HEURISTICS.find(n => n.id === nielsenFilter);
+        if (h && !h.categories.includes(issue.category)) return false;
+      }
+      return true;
+    });
+  }, [selectedPageData, severityFilter, categoryFilter, nielsenFilter]);
+
+  /* Page-level severity counts for filter display */
+  const pageSeverityCounts = useMemo(() => {
+    if (!selectedPageData) return { ALL: 0 };
+    const counts: Record<string, number> = { ALL: selectedPageData.issues.length };
+    for (const issue of selectedPageData.issues) {
+      counts[issue.severity] = (counts[issue.severity] || 0) + 1;
+    }
+    return counts;
+  }, [selectedPageData]);
+
+  /* Page-level available categories */
+  const pageAvailableCategories = useMemo(() => {
+    if (!selectedPageData) return [];
+    const cats = new Set(selectedPageData.issues.map((i) => i.category));
+    return Array.from(cats).sort();
+  }, [selectedPageData]);
+
+  /* Page-level Nielsen counts */
+  const pageNielsenCounts = useMemo(() => {
+    if (!selectedPageData) return {};
+    const counts: Record<string, number> = {};
+    for (const h of NIELSEN_HEURISTICS) {
+      counts[h.id] = selectedPageData.issues.filter(i => h.categories.includes(i.category)).length;
+    }
+    return counts;
+  }, [selectedPageData]);
+
   return (
     <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
       {/* Sidebar */}
@@ -927,124 +877,165 @@ function PagesTab({
             </CardContent>
           </Card>
 
-          {/* Viewport toggle + screenshot */}
-          {Object.keys(selectedPageData.screenshots).length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">Capture d&apos;ecran</CardTitle>
-                  <div className="flex gap-1 rounded-lg bg-muted p-0.5">
-                    {VIEWPORT_OPTIONS.map((vp) => {
-                      const VpIcon = vp.icon;
-                      return (
-                        <button
-                          key={vp.key}
-                          onClick={() => setViewport(vp.key)}
-                          className={cn(
-                            'rounded-md p-1.5 transition-all',
-                            viewport === vp.key
-                              ? 'bg-background text-foreground shadow-sm'
-                              : 'text-muted-foreground hover:text-foreground'
-                          )}
-                          title={vp.label}
-                        >
-                          <VpIcon className="h-4 w-4" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {selectedPageData.screenshots[viewport] ? (
-                  <div className="overflow-hidden rounded-lg border border-border">
-                    <img
-                      src={selectedPageData.screenshots[viewport]}
-                      alt={`Capture ${viewport}`}
-                      className="w-full"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
-                    Aucune capture pour ce viewport
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Nielsen filter for page issues */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Brain className="h-3.5 w-3.5" />
-              <span className="font-medium">Nielsen :</span>
-            </div>
-            <button
-              onClick={() => setNielsenFilter('ALL')}
-              className={cn(
-                'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-medium transition-all',
-                nielsenFilter === 'ALL'
-                  ? 'border-foreground/20 bg-muted text-foreground'
-                  : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-              )}
-            >
-              Tous
-            </button>
-            {NIELSEN_HEURISTICS.map((h) => {
-              const count = selectedPageData?.issues.filter(i => h.categories.includes(i.category)).length ?? 0;
-              if (count === 0) return null;
-              return (
-                <button
-                  key={h.id}
-                  onClick={() => setNielsenFilter(h.id)}
-                  className={cn(
-                    'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-medium transition-all',
-                    nielsenFilter === h.id
-                      ? 'border-foreground/20 bg-muted text-foreground'
-                      : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-                  )}
-                >
-                  {h.label}
-                  <span className="tabular-nums opacity-60">({count})</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Page issues */}
+          {/* Viewport toggle + screenshot with numbered issue points */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">
-                Problèmes ({pageFilteredIssues.length})
-                {nielsenFilter !== 'ALL' && (
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">
-                    — {NIELSEN_HEURISTICS.find(h => h.id === nielsenFilter)?.label}
-                  </span>
-                )}
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm">Capture d&apos;écran</CardTitle>
+                <div className="flex gap-1 rounded-lg bg-muted p-0.5">
+                  {VIEWPORT_OPTIONS.map((vp) => {
+                    const VpIcon = vp.icon;
+                    return (
+                      <button
+                        key={vp.key}
+                        onClick={() => setViewport(vp.key)}
+                        className={cn(
+                          'rounded-md p-1.5 transition-all',
+                          viewport === vp.key
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                        )}
+                        title={vp.label}
+                      >
+                        <VpIcon className="h-4 w-4" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-2">
-              {pageFilteredIssues.length === 0 ? (
-                <p className="py-6 text-center text-sm text-muted-foreground">
-                  Aucun problème {nielsenFilter !== 'ALL' ? 'pour ce critère Nielsen' : 'détecté'} sur cette page.
-                </p>
-              ) : (
-                pageFilteredIssues.map((issue) => (
-                  <IssueCard
-                    key={issue.id}
-                    issue={issue}
-                    expanded={expandedIssues.has(issue.id)}
-                    onToggle={() => toggleIssue(issue.id)}
+            <CardContent>
+              {selectedPageData.screenshots[viewport] ? (
+                <div className="relative overflow-hidden rounded-lg border border-border">
+                  <img
+                    src={selectedPageData.screenshots[viewport]}
+                    alt={`Capture ${viewport}`}
+                    className="w-full"
                   />
-                ))
+                  {/* Numbered issue points overlay */}
+                  {pageFilteredIssues.length > 0 && (
+                    <div className="absolute inset-0 pointer-events-none">
+                      {pageFilteredIssues.slice(0, 20).map((issue, idx) => {
+                        const sevColor = issue.severity === 'CRITICAL' ? 'bg-red-500'
+                          : issue.severity === 'MAJOR' ? 'bg-orange-500'
+                          : issue.severity === 'MINOR' ? 'bg-yellow-500'
+                          : 'bg-blue-500';
+                        const col = idx % 4;
+                        const row = Math.floor(idx / 4);
+                        const left = 8 + col * 22;
+                        const top = 6 + row * 12;
+                        return (
+                          <span
+                            key={issue.id}
+                            className={`absolute flex h-6 w-6 items-center justify-center rounded-full ${sevColor} text-white text-[10px] font-bold shadow-lg ring-2 ring-white/80`}
+                            style={{ left: `${left}%`, top: `${top}%` }}
+                            title={`#${idx + 1} — ${issue.title}`}
+                          >
+                            {idx + 1}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
+                  Aucune capture pour ce viewport
+                </div>
               )}
             </CardContent>
           </Card>
+
+          {/* Filters (same system as Issues tab) */}
+          <div className="rounded-lg border border-border overflow-hidden">
+            <button
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-sm font-medium hover:bg-muted/50 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                Filtres
+              </span>
+              {filtersOpen ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+            {filtersOpen && (
+              <div className="border-t border-border p-4 space-y-3 bg-muted/20">
+                <div className="flex flex-wrap gap-3 items-center">
+                  <select
+                    value={severityFilter}
+                    onChange={(e) => setSeverityFilter(e.target.value)}
+                    className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30 min-w-[120px]"
+                  >
+                    {severityOptions.map((opt) => (
+                      <option key={opt.key} value={opt.key}>
+                        {opt.label} ({pageSeverityCounts[opt.key] ?? 0})
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30 min-w-[140px]"
+                  >
+                    <option value="ALL">Toutes catégories</option>
+                    {pageAvailableCategories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {CATEGORY_LABELS[cat as IssueCategory] ?? cat}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={nielsenFilter}
+                    onChange={(e) => setNielsenFilter(e.target.value)}
+                    className="rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/30 min-w-[140px]"
+                  >
+                    <option value="ALL">Tous Nielsen</option>
+                    {NIELSEN_HEURISTICS.filter((h) => (pageNielsenCounts[h.id] ?? 0) > 0).map((h) => (
+                      <option key={h.id} value={h.id}>
+                        {h.label} ({pageNielsenCounts[h.id] ?? 0})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Page issues */}
+          <p className="text-sm text-muted-foreground">
+            {pageFilteredIssues.length} problème{pageFilteredIssues.length !== 1 ? 's' : ''} trouvé{pageFilteredIssues.length !== 1 ? 's' : ''}
+          </p>
+
+          <div className="space-y-2">
+            {pageFilteredIssues.length === 0 ? (
+              <Card>
+                <CardContent className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                  Aucun problème ne correspond aux filtres sélectionnés.
+                </CardContent>
+              </Card>
+            ) : (
+              pageFilteredIssues.map((issue, idx) => (
+                <IssueCard
+                  key={issue.id}
+                  issue={issue}
+                  index={idx + 1}
+                  expanded={expandedIssues.has(issue.id)}
+                  onToggle={() => toggleIssue(issue.id)}
+                  corrected={correctedIssues.has(issue.id)}
+                  onToggleCorrected={() => toggleCorrected(issue.id)}
+                />
+              ))
+            )}
+          </div>
         </div>
       ) : (
         <Card>
           <CardContent className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-                  Sélectionnez une page dans la liste.
+            Sélectionnez une page dans la liste.
           </CardContent>
         </Card>
       )}
@@ -1062,12 +1053,16 @@ function RoadmapTab({
   toggleRoadmap,
   expandedIssues,
   toggleIssue,
+  correctedIssues,
+  toggleCorrected,
 }: {
   roadmapGroups: Record<string, IssueData[]>;
   expandedRoadmap: Set<string>;
   toggleRoadmap: (key: string) => void;
   expandedIssues: Set<string>;
   toggleIssue: (id: string) => void;
+  correctedIssues: Set<string>;
+  toggleCorrected: (id: string) => void;
 }) {
   const groupOrder = ['QUICK_WIN', 'MEDIUM', 'LONG_TERM'];
 
@@ -1108,6 +1103,8 @@ function RoadmapTab({
                     issue={issue}
                     expanded={expandedIssues.has(issue.id)}
                     onToggle={() => toggleIssue(issue.id)}
+                    corrected={correctedIssues.has(issue.id)}
+                    onToggleCorrected={() => toggleCorrected(issue.id)}
                   />
                 ))}
               </CardContent>
@@ -1135,11 +1132,15 @@ function IssueCard({
   index,
   expanded,
   onToggle,
+  corrected,
+  onToggleCorrected,
 }: {
   issue: IssueData;
   index?: number;
   expanded: boolean;
   onToggle: () => void;
+  corrected?: boolean;
+  onToggleCorrected?: () => void;
 }) {
   const severityVariant = SEVERITY_BADGE_MAP[issue.severity] ?? 'outline';
   const effortConfig = EFFORT_CONFIG[issue.effortLevel];
@@ -1148,15 +1149,31 @@ function IssueCard({
     <div
       className={cn(
         'rounded-lg border border-border transition-all',
-        expanded ? 'bg-muted/30' : 'hover:bg-muted/20'
+        expanded ? 'bg-muted/30' : 'hover:bg-muted/20',
+        corrected && 'opacity-75 border-green-500/30'
       )}
     >
       {/* Header row */}
-      <button
-        onClick={onToggle}
-        className="flex w-full items-center gap-3 p-3 text-left"
-      >
-        {index !== undefined && (
+      <div className="flex w-full items-stretch">
+        {onToggleCorrected && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleCorrected(); }}
+            className="flex shrink-0 items-center justify-center w-10 border-r border-border hover:bg-muted/50 transition-colors"
+            title={corrected ? 'Marquer comme non corrigé' : 'Marquer comme corrigé'}
+          >
+            <span className={cn(
+              'flex h-4 w-4 items-center justify-center rounded border transition-colors',
+              corrected ? 'bg-green-500 border-green-500 text-white' : 'border-muted-foreground'
+            )}>
+              {corrected && <Check className="h-2.5 w-2.5" />}
+            </span>
+          </button>
+        )}
+        <button
+          onClick={onToggle}
+          className="flex flex-1 items-center gap-3 p-3 text-left min-w-0"
+        >
+          {index !== undefined && (
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold tabular-nums text-muted-foreground">
             {index}
           </span>
@@ -1172,9 +1189,6 @@ function IssueCard({
             <span className="inline-flex items-center rounded-md border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
               {CATEGORY_LABELS[issue.category as IssueCategory] ?? issue.category}
             </span>
-            {issue.framework && (
-              <FrameworkBadge framework={issue.framework} />
-            )}
             {effortConfig && (
               <span className="inline-flex items-center rounded-md border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 {effortConfig.label}
@@ -1193,7 +1207,8 @@ function IssueCard({
         ) : (
           <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
         )}
-      </button>
+        </button>
+      </div>
 
       {/* Expanded content */}
       {expanded && (
@@ -1216,7 +1231,6 @@ function IssueCard({
 
           {/* Meta grid */}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <MetaItem label="Référentiel" value={issue.framework} />
             {issue.criterion && <MetaItem label="Critère" value={issue.criterion} />}
             <MetaItem label="Impact" value={`${issue.impact}/10`} />
           </div>
@@ -1255,15 +1269,6 @@ function IssueCard({
 /* ================================================================== */
 /*  Helpers                                                            */
 /* ================================================================== */
-
-function FrameworkBadge({ framework }: { framework: string }) {
-  const config = FRAMEWORK_CONFIG[framework];
-  return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-      {config?.abbrev ?? framework}
-    </span>
-  );
-}
 
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (

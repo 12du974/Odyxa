@@ -147,7 +147,7 @@ export default async function DashboardPage() {
               <Link key={audit.id} href={audit.status === 'COMPLETED' ? `/audit/${audit.id}` : `/audit/${audit.id}/progress`}>
                 <Card className="group cursor-pointer transition-all hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
                       style={{ animationDelay: `${i * 50}ms` }}>
-                  <CardContent className="flex items-center gap-4 p-4">
+                  <CardContent className="flex items-center gap-4 p-5">
                     {/* Score */}
                     <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${getScoreBg(audit.globalScore)}`}>
                       <span className={`text-xl font-bold tabular-nums ${getScoreColor(audit.globalScore)}`}>

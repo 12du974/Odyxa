@@ -11,7 +11,7 @@ export async function runAudit(auditId: string, url: string, config: ScanConfig)
   try {
     await prisma.audit.update({ where: { id: auditId }, data: { status: 'CRAWLING', startedAt: new Date() } });
     updateAuditState(auditId, { status: 'CRAWLING' });
-    log('Debut du crawl...');
+    log('Début du crawl...');
 
     const pages = await crawlSite(url, config, auditId, log, (scanned, total) => {
       updateAuditState(auditId, { pagesScanned: scanned, totalPages: total });
@@ -22,7 +22,7 @@ export async function runAudit(auditId: string, url: string, config: ScanConfig)
       data: { status: 'ANALYZING', totalPages: pages.length, pagesScanned: pages.length },
     });
     updateAuditState(auditId, { status: 'ANALYZING', pagesScanned: pages.length, totalPages: pages.length });
-    log(`Crawl termine. Analyse de ${pages.length} pages...`);
+    log(`Crawl terminé. Analyse de ${pages.length} pages...`);
 
     const catScores: Record<string, number[]> = {};
     let totalIssues = 0;
@@ -101,7 +101,7 @@ export async function runAudit(auditId: string, url: string, config: ScanConfig)
     });
 
     updateAuditState(auditId, { status: 'COMPLETED' });
-    log(`Audit termine ! Score: ${globalResult.global}/100, ${totalIssues} issues.`);
+    log(`Audit terminé ! Score: ${globalResult.global}/100, ${totalIssues} problèmes.`);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erreur inconnue';
     log(`ERREUR: ${msg}`);

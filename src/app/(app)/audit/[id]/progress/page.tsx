@@ -126,7 +126,7 @@ export default function AuditProgressPage() {
           <Progress value={progressPercent} className="h-2" indicatorClassName={
             audit?.status === 'COMPLETED' ? 'bg-green-500' :
             audit?.status === 'FAILED' ? 'bg-red-500' :
-            'bg-gradient-to-r from-odixa-lime to-odixa-purple'
+            'bg-odixa-black dark:bg-odixa-lime'
           } />
           {phaseLabel && (
             <p className="text-xs text-muted-foreground text-center">{phaseLabel}</p>
@@ -163,7 +163,7 @@ export default function AuditProgressPage() {
 
       {audit?.status === 'COMPLETED' && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <Button variant="gradient" size="lg" onClick={() => router.push(`/audit/${auditId}`)}>
+          <Button variant="default" size="lg" onClick={() => router.push(`/audit/${auditId}`)}>
             Voir le rapport <ArrowRight className="h-4 w-4" />
           </Button>
         </motion.div>

@@ -4,40 +4,66 @@ import Link from 'next/link';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import {
-  ArrowRight, Shield, Zap, Eye, Palette, Search, BarChart3,
+  ArrowRight, Shield, Zap, Eye, Palette, Search,
   CheckCircle, Globe, Code, MonitorSmartphone, ChevronRight, Menu, X,
+  Sparkles,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
+
+function AnimateIn({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-60px' });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <div className="min-h-screen bg-background">
         {/* Navbar */}
-        <nav className="fixed top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg">
+        <nav className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+          scrolled ? 'bg-background/90 backdrop-blur-xl border-b border-border/60 shadow-sm' : 'bg-transparent'
+        }`}>
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-            <div className="flex items-center gap-2">
-              <img src="/logo-odixa.svg" alt="Odixa" className="h-8 w-8 rounded-lg object-contain" />
-              <span className="text-lg font-bold">Odixa</span>
-            </div>
+            <Link href="/" className="flex items-center">
+              <img src="/logo-odixa-black.png" alt="Odixa" className="h-7 dark:hidden" />
+              <img src="/logo-odixa-lime.png" alt="Odixa" className="h-7 hidden dark:block" />
+            </Link>
             <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-              <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-              <a href="#how" className="hover:text-foreground transition-colors">Comment &ccedil;a marche</a>
-              <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+              <a href="#features" className="hover:text-foreground transition-colors duration-200">Fonctionnalit&eacute;s</a>
+              <a href="#how" className="hover:text-foreground transition-colors duration-200">Comment &ccedil;a marche</a>
+              <a href="#pricing" className="hover:text-foreground transition-colors duration-200">Tarifs</a>
             </div>
             <div className="hidden sm:flex items-center gap-3">
               <Link href="/dashboard">
                 <Button variant="ghost" size="sm">Se connecter</Button>
               </Link>
               <Link href="/audit/new">
-                <Button variant="gradient" size="sm">
+                <Button size="sm">
                   Essai gratuit <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
-            {/* Mobile hamburger */}
             <button
               className="sm:hidden p-2 rounded-lg hover:bg-muted transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -46,53 +72,76 @@ export default function LandingPage() {
             </button>
           </div>
 
-          {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className="sm:hidden border-t border-border bg-background px-4 py-4 space-y-3">
-              <a href="#features" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Features</a>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="sm:hidden border-t border-border bg-background px-4 py-4 space-y-3"
+            >
+              <a href="#features" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Fonctionnalit&eacute;s</a>
               <a href="#how" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Comment &ccedil;a marche</a>
-              <a href="#pricing" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+              <a href="#pricing" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Tarifs</a>
               <div className="pt-3 border-t border-border flex flex-col gap-2">
                 <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-center">Se connecter</Button>
                 </Link>
                 <Link href="/audit/new" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="gradient" size="sm" className="w-full justify-center">
+                  <Button size="sm" className="w-full justify-center">
                     Essai gratuit <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 </Link>
               </div>
-            </div>
+            </motion.div>
           )}
         </nav>
 
         {/* Hero */}
-        <section className="relative overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-20">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(234,252,135,0.15),transparent)]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] bg-odixa-lime/10 rounded-full blur-3xl" />
+        <section className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
+          {/* Subtle bg glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-odixa-lime/8 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-odixa-purple/8 rounded-full blur-[100px] pointer-events-none" />
 
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs sm:text-sm sm:px-4 text-muted-foreground mb-6 sm:mb-8">
-              <img src="/logo-odixa.svg" alt="" className="h-4 w-4" />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 rounded-full bg-odixa-lime/15 px-4 py-1.5 text-xs sm:text-sm font-medium text-foreground mb-8"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
               Propuls&eacute; par l&rsquo;IA et les standards internationaux
-            </div>
+            </motion.div>
 
-            <h1 className="mx-auto max-w-4xl text-3xl font-extrabold tracking-tight sm:text-5xl lg:text-7xl">
-              Auditez l&rsquo;UX de
-              <span className="gradient-text"> n&rsquo;importe quel </span>
-              site web en minutes
-            </h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-[4.5rem] leading-[1.1]"
+            >
+              D&eacute;voilez l&rsquo;invisible de
+              <span className="text-gradient"> votre UX</span>
+            </motion.h1>
 
-            <p className="mx-auto mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed px-2">
-              Scan automatis&eacute; bas&eacute; sur Nielsen, WCAG 2.2, Laws of UX, Material Design et 10+ frameworks.
-              Obtenez un rapport d&eacute;taill&eacute; avec un score global, des issues class&eacute;es par priorit&eacute; et des recommandations actionnables.
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed"
+            >
+              Scan automatis&eacute; bas&eacute; sur Nielsen, WCAG 2.2, Laws of UX et 10+ frameworks.
+              Rapport d&eacute;taill&eacute; avec score global et recommandations actionnables.
+            </motion.p>
 
-            <div className="mt-8 sm:mt-10 flex flex-col items-center gap-3 sm:gap-4 sm:flex-row sm:justify-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-10 flex flex-col items-center gap-3 sm:gap-4 sm:flex-row sm:justify-center"
+            >
               <Link href="/audit/new" className="w-full sm:w-auto">
-                <Button variant="gradient" size="lg" className="w-full sm:w-auto sm:text-base sm:h-14 sm:px-8">
+                <Button size="lg" className="w-full sm:w-auto sm:text-base sm:h-14 sm:px-8">
                   Lancer un audit gratuit
-                  <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/dashboard" className="w-full sm:w-auto">
@@ -100,112 +149,134 @@ export default function LandingPage() {
                   Voir la d&eacute;mo
                 </Button>
               </Link>
-            </div>
+            </motion.div>
 
-            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
-              <span className="flex items-center gap-1"><CheckCircle className="h-4 w-4 text-green-500" /> Gratuit jusqu&rsquo;&agrave; 3 audits</span>
-              <span className="flex items-center gap-1"><CheckCircle className="h-4 w-4 text-green-500" /> Aucune installation</span>
-              <span className="flex items-center gap-1"><CheckCircle className="h-4 w-4 text-green-500" /> Rapport en 5min</span>
-            </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground"
+            >
+              <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-odixa-lime" /> Gratuit jusqu&rsquo;&agrave; 3 audits</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-odixa-lime" /> Aucune installation</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-odixa-lime" /> Rapport en 5 min</span>
+            </motion.div>
 
             {/* Mock dashboard */}
-            <div className="relative mt-10 sm:mt-16 mx-auto max-w-5xl">
-              <div className="rounded-xl border border-border/50 bg-card shadow-2xl shadow-odixa-black/10 overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-                  <div className="h-3 w-3 rounded-full bg-red-400" />
-                  <div className="h-3 w-3 rounded-full bg-yellow-400" />
-                  <div className="h-3 w-3 rounded-full bg-green-400" />
-                  <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">app.odixa.com/dashboard</span>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+              className="relative mt-16 sm:mt-20 mx-auto max-w-5xl"
+            >
+              <div className="rounded-2xl border border-border bg-card shadow-2xl shadow-black/5 overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-border px-4 py-3 bg-muted/30">
+                  <div className="h-3 w-3 rounded-full bg-[#FF5F57]" />
+                  <div className="h-3 w-3 rounded-full bg-[#FEBC2E]" />
+                  <div className="h-3 w-3 rounded-full bg-[#28C840]" />
+                  <span className="ml-3 text-xs text-muted-foreground hidden sm:inline font-mono">app.odixa.com/dashboard</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-5 sm:p-8">
                   <MockScoreCard label="Score Global" score={78} color="text-odixa-purple" />
-                  <MockScoreCard label="Accessibilit&eacute;" score={85} color="text-green-500" />
-                  <MockScoreCard label="Performance" score={62} color="text-odixa-lime" />
+                  <MockScoreCard label="Accessibilit&eacute;" score={85} color="text-emerald-500" />
+                  <MockScoreCard label="Performance" score={62} color="text-amber-500" />
                   <MockScoreCard label="SEO" score={91} color="text-odixa-lavender" />
                 </div>
               </div>
-              <div className="absolute -inset-4 -z-10 rounded-2xl bg-gradient-to-r from-odixa-lime/20 via-odixa-purple/20 to-odixa-lavender/20 blur-2xl opacity-50" />
-            </div>
+              <div className="absolute -inset-px -z-10 rounded-2xl bg-odixa-lime/20 blur-xl opacity-40" />
+            </motion.div>
           </div>
         </section>
 
         {/* Features */}
-        <section id="features" className="py-16 sm:py-24 border-t border-border/50">
+        <section id="features" className="py-20 sm:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="text-center mb-10 sm:mb-16">
-              <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">8 analyseurs, 10+ frameworks, 1 rapport</h2>
-              <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
-                Chaque page est analys&eacute;e en profondeur selon les standards internationaux reconnus.
+            <AnimateIn className="text-center mb-12 sm:mb-20">
+              <p className="text-sm font-semibold text-odixa-purple mb-3 uppercase tracking-wider">Fonctionnalit&eacute;s</p>
+              <h2 className="text-3xl font-extrabold sm:text-4xl lg:text-5xl tracking-tight">8 analyseurs. 1 rapport.</h2>
+              <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+                Chaque page est analys&eacute;e en profondeur selon les standards internationaux.
               </p>
-            </div>
+            </AnimateIn>
 
-            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              <FeatureCard icon={Eye} title="Accessibilit&eacute;" desc="WCAG 2.2 A/AA/AAA, axe-core, contrastes, ARIA, navigation clavier" color="from-odixa-black to-odixa-purple" />
-              <FeatureCard icon={Zap} title="Performance" desc="Core Web Vitals, Lighthouse, lazy loading, render-blocking, poids ressources" color="from-odixa-lime to-[#d4e157]" />
-              <FeatureCard icon={Palette} title="Design System" desc="Typo, couleurs, espacements, border-radius, coh&eacute;rence des composants" color="from-odixa-purple to-odixa-lavender" />
-              <FeatureCard icon={Code} title="Formulaires" desc="Labels, validation, autocomplete, &eacute;tats visuels, champs obligatoires" color="from-green-500 to-emerald-500" />
-              <FeatureCard icon={Search} title="SEO Technique" desc="Title, meta, Open Graph, canonical, structured data, sitemap" color="from-odixa-lavender to-odixa-purple" />
-              <FeatureCard icon={MonitorSmartphone} title="Responsive" desc="Screenshots 3 viewports, touch targets, overflow, meta viewport" color="from-odixa-purple to-odixa-lavender" />
-              <FeatureCard icon={Globe} title="Navigation" desc="Profondeur, liens cass&eacute;s, breadcrumbs, architecture de l&rsquo;information" color="from-teal-500 to-odixa-lime" />
-              <FeatureCard icon={Shield} title="Dark Patterns" desc="D&eacute;tection des patterns trompeurs, confirmshaming, misdirection" color="from-odixa-lime to-red-500" />
+            <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
+              <FeatureCard icon={Eye} title="Accessibilit&eacute;" desc="WCAG 2.2 A/AA/AAA, contrastes, ARIA, navigation clavier" accent="bg-odixa-purple/10 text-odixa-purple" />
+              <FeatureCard icon={Zap} title="Performance" desc="Core Web Vitals, Lighthouse, lazy loading, poids ressources" accent="bg-odixa-lime/20 text-odixa-black dark:text-odixa-lime" />
+              <FeatureCard icon={Palette} title="Design System" desc="Typo, couleurs, espacements, coh&eacute;rence des composants" accent="bg-odixa-lavender/15 text-odixa-lavender" />
+              <FeatureCard icon={Code} title="Formulaires" desc="Labels, validation, autocomplete, &eacute;tats visuels" accent="bg-emerald-500/10 text-emerald-600" />
+              <FeatureCard icon={Search} title="SEO Technique" desc="Title, meta, Open Graph, canonical, structured data" accent="bg-odixa-purple/10 text-odixa-purple" />
+              <FeatureCard icon={MonitorSmartphone} title="Responsive" desc="3 viewports, touch targets, overflow, meta viewport" accent="bg-odixa-lime/20 text-odixa-black dark:text-odixa-lime" />
+              <FeatureCard icon={Globe} title="Navigation" desc="Profondeur, liens cass&eacute;s, breadcrumbs, architecture" accent="bg-odixa-lavender/15 text-odixa-lavender" />
+              <FeatureCard icon={Shield} title="Dark Patterns" desc="D&eacute;tection des patterns trompeurs, misdirection" accent="bg-red-500/10 text-red-500" />
             </div>
           </div>
         </section>
 
         {/* How it works */}
-        <section id="how" className="py-16 sm:py-24 bg-muted/30">
+        <section id="how" className="py-20 sm:py-32 bg-odixa-black text-white">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="text-center mb-10 sm:mb-16">
-              <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">Comment &ccedil;a marche</h2>
-              <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground">3 &eacute;tapes. 5 minutes. Des insights actionnables.</p>
-            </div>
+            <AnimateIn className="text-center mb-12 sm:mb-20">
+              <p className="text-sm font-semibold text-odixa-lime mb-3 uppercase tracking-wider">Processus</p>
+              <h2 className="text-3xl font-extrabold sm:text-4xl lg:text-5xl tracking-tight">3 &eacute;tapes. 5 minutes.</h2>
+              <p className="mt-4 text-base sm:text-lg text-white/60">Des insights actionnables, imm&eacute;diatement.</p>
+            </AnimateIn>
             <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-3">
-              <StepCard step={1} title="Entrez votre URL" desc="Collez l&rsquo;URL de votre site web. Configurez la profondeur de scan, les pages max et les analyseurs." />
-              <StepCard step={2} title="Scan automatis&eacute;" desc="Notre moteur Playwright crawle chaque page, prend des screenshots, analyse le DOM, le CSS et les performances." />
-              <StepCard step={3} title="Rapport d&eacute;taill&eacute;" desc="Score global, issues class&eacute;es par s&eacute;v&eacute;rit&eacute;, recommandations avec code correctif, screenshots annot&eacute;s." />
+              <AnimateIn delay={0}><StepCard step={1} title="Entrez votre URL" desc="Collez l'URL de votre site. Configurez la profondeur de scan et les analyseurs." /></AnimateIn>
+              <AnimateIn delay={0.1}><StepCard step={2} title="Scan automatis&eacute;" desc="Notre moteur crawle chaque page, prend des screenshots, analyse le DOM et les performances." /></AnimateIn>
+              <AnimateIn delay={0.2}><StepCard step={3} title="Rapport d&eacute;taill&eacute;" desc="Score global, issues class&eacute;es par s&eacute;v&eacute;rit&eacute;, recommandations avec code correctif." /></AnimateIn>
             </div>
           </div>
         </section>
 
         {/* Pricing */}
-        <section id="pricing" className="py-16 sm:py-24">
+        <section id="pricing" className="py-20 sm:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="text-center mb-10 sm:mb-16">
-              <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl">Tarifs simples, r&eacute;sultats puissants</h2>
-            </div>
+            <AnimateIn className="text-center mb-12 sm:mb-20">
+              <p className="text-sm font-semibold text-odixa-purple mb-3 uppercase tracking-wider">Tarifs</p>
+              <h2 className="text-3xl font-extrabold sm:text-4xl lg:text-5xl tracking-tight">Simple et transparent</h2>
+            </AnimateIn>
             <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-3 max-w-5xl mx-auto">
-              <PricingCard name="Free" price="0" desc="Pour d&eacute;couvrir" features={['3 audits / mois', '10 pages max / audit', '6 analyseurs', 'Rapport web']} />
-              <PricingCard name="Pro" price="49" desc="Pour les pros" features={['Audits illimit\u00e9s', '100 pages / audit', '8 analyseurs + IA', 'Export PDF, CSV', 'Monitoring programm\u00e9', 'API access']} highlighted />
-              <PricingCard name="Enterprise" price="199" desc="Pour les \u00e9quipes" features={['Tout Pro +', 'Pages illimit\u00e9es', 'White-label', 'SSO & multi-tenant', 'Support prioritaire', 'SLA 99.9%']} />
+              <AnimateIn delay={0}><PricingCard name="Free" price="0" desc="Pour d&eacute;couvrir" features={['3 audits / mois', '10 pages max / audit', '6 analyseurs', 'Rapport web']} /></AnimateIn>
+              <AnimateIn delay={0.1}><PricingCard name="Pro" price="49" desc="Pour les pros" features={['Audits illimit\u00e9s', '100 pages / audit', '8 analyseurs + IA', 'Export PDF, CSV', 'Monitoring programm\u00e9', 'API access']} highlighted /></AnimateIn>
+              <AnimateIn delay={0.2}><PricingCard name="Enterprise" price="199" desc="Pour les \u00e9quipes" features={['Tout Pro +', 'Pages illimit\u00e9es', 'White-label', 'SSO & multi-tenant', 'Support prioritaire', 'SLA 99.9%']} /></AnimateIn>
             </div>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="py-16 sm:py-24 border-t border-border/50">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-            <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl gradient-text inline-block">
-              Pr&ecirc;t &agrave; transformer votre UX avec Odixa ?
-            </h2>
-            <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground">
-              Lancez votre premier audit gratuit en 30 secondes. Aucune carte requise.
-            </p>
-            <div className="mt-6 sm:mt-8">
-              <Link href="/audit/new" className="w-full sm:w-auto inline-block">
-                <Button variant="gradient" size="lg" className="w-full sm:w-auto sm:text-base sm:h-14 sm:px-10">
-                  Commencer maintenant <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Link>
+        <section className="py-20 sm:py-32">
+          <AnimateIn>
+            <div className="mx-auto max-w-4xl px-4 sm:px-6">
+              <div className="relative rounded-3xl bg-odixa-black p-10 sm:p-16 text-center overflow-hidden">
+                <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-odixa-lime/20 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-odixa-purple/20 rounded-full blur-[60px] pointer-events-none" />
+                <div className="relative">
+                  <h2 className="text-2xl font-extrabold sm:text-4xl text-white tracking-tight">
+                    Pr&ecirc;t &agrave; transformer votre UX ?
+                  </h2>
+                  <p className="mt-4 text-base sm:text-lg text-white/60">
+                    Premier audit gratuit en 30 secondes. Aucune carte requise.
+                  </p>
+                  <div className="mt-8">
+                    <Link href="/audit/new">
+                      <Button variant="lime" size="lg" className="sm:text-base sm:h-14 sm:px-10">
+                        Commencer maintenant <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </AnimateIn>
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-border py-6 sm:py-8">
+        <footer className="border-t border-border py-8 sm:py-10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <img src="/logo-odixa.svg" alt="Odixa" className="h-4 w-4" />
-              <span>Odixa &copy; 2026</span>
+            <div className="flex items-center gap-3">
+              <img src="/logo-odixa-black.png" alt="Odixa" className="h-5 dark:hidden opacity-60" />
+              <img src="/logo-odixa-lime.png" alt="Odixa" className="h-5 hidden dark:block opacity-60" />
+              <span>&copy; 2026</span>
             </div>
             <div className="flex gap-6">
               <a href="#" className="hover:text-foreground transition-colors">Documentation</a>
@@ -221,38 +292,38 @@ export default function LandingPage() {
 
 function MockScoreCard({ label, score, color }: { label: string; score: number; color: string }) {
   return (
-    <div className="rounded-lg border border-border bg-background p-3 sm:p-4 text-left">
-      <p className="text-[10px] sm:text-xs text-muted-foreground">{label}</p>
-      <p className={`text-xl sm:text-3xl font-bold ${color}`}>{score}</p>
-      <div className="mt-1.5 sm:mt-2 h-1 sm:h-1.5 rounded-full bg-muted overflow-hidden">
+    <div className="rounded-xl bg-muted/50 p-3 sm:p-5 text-left">
+      <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">{label}</p>
+      <p className={`text-2xl sm:text-3xl font-bold mt-1 ${color}`}>{score}</p>
+      <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
         <div className={`h-full rounded-full bg-current ${color}`} style={{ width: `${score}%` }} />
       </div>
     </div>
   );
 }
 
-function FeatureCard({ icon: Icon, title, desc, color }: { icon: React.ElementType; title: string; desc: string; color: string }) {
+function FeatureCard({ icon: Icon, title, desc, accent }: { icon: React.ElementType; title: string; desc: string; accent: string }) {
   return (
-    <div className="group relative rounded-xl border border-border bg-card p-5 sm:p-6 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
-      <div className={`mb-3 sm:mb-4 inline-flex rounded-lg bg-gradient-to-br ${color} p-2 sm:p-2.5`}>
-        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+    <div className="group rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:border-foreground/10 hover:shadow-lg hover:shadow-black/[0.03] hover:-translate-y-1">
+      <div className={`mb-4 inline-flex rounded-xl ${accent} p-2.5`}>
+        <Icon className="h-5 w-5" />
       </div>
-      <h3 className="font-semibold text-sm sm:text-base">{title}</h3>
-      <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">{desc}</p>
+      <h3 className="font-bold text-[15px]">{title}</h3>
+      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{desc}</p>
     </div>
   );
 }
 
 function StepCard({ step, title, desc }: { step: number; title: string; desc: string }) {
   return (
-    <div className="relative rounded-xl border border-border bg-card p-6 sm:p-8 text-center">
-      <div className="mx-auto mb-3 sm:mb-4 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-gradient-to-br from-odixa-black to-odixa-purple text-base sm:text-lg font-bold text-white">
+    <div className="relative rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm">
+      <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-odixa-lime text-odixa-black text-lg font-bold">
         {step}
       </div>
-      <h3 className="text-base sm:text-lg font-semibold">{title}</h3>
-      <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground">{desc}</p>
+      <h3 className="text-lg font-bold">{title}</h3>
+      <p className="mt-2 text-sm text-white/50 leading-relaxed">{desc}</p>
       {step < 3 && (
-        <ChevronRight className="absolute top-1/2 -right-4 hidden h-6 w-6 text-muted-foreground md:block" />
+        <ChevronRight className="absolute top-1/2 -right-4 hidden h-6 w-6 text-white/20 md:block" />
       )}
     </div>
   );
@@ -262,31 +333,31 @@ function PricingCard({ name, price, desc, features, highlighted }: {
   name: string; price: string; desc: string; features: string[]; highlighted?: boolean;
 }) {
   return (
-    <div className={`relative rounded-xl border p-6 sm:p-8 transition-all ${
-      highlighted ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10 md:scale-105' : 'border-border bg-card'
+    <div className={`relative rounded-2xl border p-7 sm:p-8 transition-all duration-300 ${
+      highlighted ? 'border-odixa-black dark:border-odixa-lime bg-odixa-black dark:bg-odixa-lime/5 text-white dark:text-foreground shadow-2xl shadow-black/10 md:scale-105' : 'border-border bg-card hover:border-foreground/10'
     }`}>
       {highlighted && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-odixa-black to-odixa-lime px-4 py-1 text-xs font-bold text-white">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-odixa-lime text-odixa-black px-4 py-1 text-xs font-bold">
           Populaire
         </div>
       )}
-      <h3 className="text-lg sm:text-xl font-bold">{name}</h3>
-      <p className="text-xs sm:text-sm text-muted-foreground">{desc}</p>
-      <div className="mt-3 sm:mt-4 flex items-baseline gap-1">
-        <span className="text-3xl sm:text-4xl font-extrabold">{price}&euro;</span>
-        <span className="text-muted-foreground text-sm">/mois</span>
+      <h3 className="text-xl font-bold">{name}</h3>
+      <p className={`text-sm ${highlighted ? 'text-white/60 dark:text-muted-foreground' : 'text-muted-foreground'}`}>{desc}</p>
+      <div className="mt-4 flex items-baseline gap-1">
+        <span className="text-4xl font-extrabold">{price}&euro;</span>
+        <span className={`text-sm ${highlighted ? 'text-white/50 dark:text-muted-foreground' : 'text-muted-foreground'}`}>/mois</span>
       </div>
-      <ul className="mt-4 sm:mt-6 space-y-2.5 sm:space-y-3">
+      <ul className="mt-6 space-y-3">
         {features.map((f) => (
-          <li key={f} className="flex items-center gap-2 text-xs sm:text-sm">
-            <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+          <li key={f} className="flex items-center gap-2.5 text-sm">
+            <CheckCircle className={`h-4 w-4 shrink-0 ${highlighted ? 'text-odixa-lime' : 'text-odixa-purple'}`} />
             {f}
           </li>
         ))}
       </ul>
-      <div className="mt-6 sm:mt-8">
+      <div className="mt-8">
         <Link href="/audit/new">
-          <Button variant={highlighted ? 'gradient' : 'outline'} className="w-full">
+          <Button variant={highlighted ? 'lime' : 'outline'} className="w-full">
             Commencer
           </Button>
         </Link>

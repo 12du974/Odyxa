@@ -244,7 +244,7 @@ export default function NewAuditPage() {
             Suivant <ArrowRight className="h-4 w-4" />
           </Button>
         ) : (
-          <Button variant="gradient" size="lg" onClick={handleSubmit} disabled={loading || selectedCategories.length === 0}>
+          <Button variant="default" size="lg" onClick={handleSubmit} disabled={loading || selectedCategories.length === 0}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
             {loading ? 'Lancement...' : "Lancer l’audit"}
           </Button>

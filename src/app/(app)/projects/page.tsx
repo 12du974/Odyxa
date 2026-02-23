@@ -30,7 +30,7 @@ export default async function ProjectsPage() {
           <p className="mt-1 text-sm sm:text-base text-muted-foreground">Vos projets et leurs audits</p>
         </div>
         <Link href="/audit/new">
-          <Button variant="gradient" className="w-full sm:w-auto"><Plus className="h-4 w-4" /> Nouvel audit</Button>
+          <Button variant="default" className="w-full sm:w-auto"><Plus className="h-4 w-4" /> Nouvel audit</Button>
         </Link>
       </div>
 
@@ -40,7 +40,7 @@ export default async function ProjectsPage() {
             <div className="mb-4 rounded-full bg-muted p-4"><Globe className="h-8 w-8 text-muted-foreground" /></div>
             <h3 className="text-lg font-semibold">Aucun rapport</h3>
             <p className="mt-1 text-sm text-muted-foreground mb-4">Lancez votre premier audit pour g&eacute;n&eacute;rer un rapport.</p>
-            <Link href="/audit/new"><Button variant="gradient"><Plus className="h-4 w-4" /> Lancer un audit</Button></Link>
+            <Link href="/audit/new"><Button variant="default"><Plus className="h-4 w-4" /> Lancer un audit</Button></Link>
           </CardContent>
         </Card>
       ) : (

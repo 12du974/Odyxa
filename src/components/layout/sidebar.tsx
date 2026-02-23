@@ -40,8 +40,8 @@ export function Sidebar() {
       {/* Logo Odixa */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
         <Link href="/" className="flex items-center gap-2.5 min-w-0">
-          <img src="/logo-odixa-black.png" alt="Odixa" className={cn('dark:hidden object-contain', collapsed ? 'h-6' : 'h-6')} />
-          <img src="/logo-odixa-lime.png" alt="Odixa" className={cn('hidden dark:block object-contain', collapsed ? 'h-6' : 'h-6')} />
+          <img src="/logo-odixa-black.png" alt="Odixa" className="dark:hidden object-contain h-6" />
+          <img src="/logo-odixa-lime.png" alt="Odixa" className="hidden dark:block object-contain h-6" />
         </Link>
         <button
           className="ml-auto lg:hidden p-1.5 rounded-lg hover:bg-muted transition-colors"

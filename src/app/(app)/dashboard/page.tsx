@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,10 +42,12 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Annulé',
 };
 
+type AuditWithProject = Prisma.AuditGetPayload<{ include: { project: true } }>;
+
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  let audits: any[] = [];
+  let audits: AuditWithProject[] = [];
   let projectCount = 0;
   try {
     audits = await prisma.audit.findMany({

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { BarChart3, ArrowUpRight, Calendar, Globe } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
+type AuditWithProject = Prisma.AuditGetPayload<{ include: { project: true } }>;
+
 export const dynamic = 'force-dynamic';
 
 export default async function ReportsPage() {
-  let audits: any[] = [];
+  let audits: AuditWithProject[] = [];
   try {
     audits = await prisma.audit.findMany({
       where: { status: 'COMPLETED' },

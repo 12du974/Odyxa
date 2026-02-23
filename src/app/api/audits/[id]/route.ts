@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { getAuditState } from '@/lib/audit-state';
+
+type AuditWithProject = Prisma.AuditGetPayload<{ include: { project: true } }>;
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  let audit: any = null;
+  let audit: AuditWithProject | null = null;
   try {
     audit = await prisma.audit.findUnique({
       where: { id: params.id },

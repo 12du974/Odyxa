@@ -126,7 +126,11 @@ async function crawlWithPlaywright(
   const screenshotDir = isWritable
     ? path.join(process.cwd(), 'public', 'screenshots', auditId)
     : path.join('/tmp', 'screenshots', auditId);
-  fs.mkdirSync(screenshotDir, { recursive: true });
+  try {
+    fs.mkdirSync(screenshotDir, { recursive: true });
+  } catch (err) {
+    onLog(`Avertissement: impossible de créer le dossier screenshots: ${err instanceof Error ? err.message : 'Erreur'}`);
+  }
 
   let browser = null;
   try {

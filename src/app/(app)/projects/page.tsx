@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,10 +7,17 @@ import { Badge } from '@/components/ui/badge';
 import { Globe, Plus, ArrowUpRight, Calendar } from 'lucide-react';
 import { formatRelativeTime, formatDate } from '@/lib/utils';
 
+type ProjectWithAudits = Prisma.ProjectGetPayload<{
+  include: {
+    audits: true;
+    _count: { select: { audits: true } };
+  };
+}>;
+
 export const dynamic = 'force-dynamic';
 
 export default async function ProjectsPage() {
-  let projects: any[] = [];
+  let projects: ProjectWithAudits[] = [];
   try {
     projects = await prisma.project.findMany({
       include: {
@@ -74,7 +82,7 @@ export default async function ProjectsPage() {
 
                   {/* Audits list */}
                   <div className="space-y-2">
-                    {project.audits.map((audit: any) => (
+                    {project.audits.map((audit) => (
                       <Link
                         key={audit.id}
                         href={audit.status === 'COMPLETED' ? `/audit/${audit.id}` : `/audit/${audit.id}/progress`}

@@ -96,7 +96,7 @@ export const SEVERITY_LABELS: Record<Severity, string> = {
 };
 
 export const CATEGORY_LABELS: Record<IssueCategory, string> = {
-  ACCESSIBILITY: 'Accessibilite',
+  ACCESSIBILITY: 'Accessibilité',
   PERFORMANCE: 'Performance',
   DESIGN_CONSISTENCY: 'Design & Coherence',
   FORMS: 'Formulaires',
@@ -187,7 +187,7 @@ export const STATUS_CONFIG: Record<AuditStatus, { label: string; color: string; 
   SCANNING: { label: 'Scan', color: 'bg-blue-500', icon: 'ScanSearch' },
   ANALYZING: { label: 'Analyse', color: 'bg-purple-500', icon: 'Brain' },
   GENERATING_REPORT: { label: 'Rapport', color: 'bg-purple-500', icon: 'FileText' },
-  COMPLETED: { label: 'Termine', color: 'bg-green-500', icon: 'CheckCircle' },
-  FAILED: { label: 'Echoue', color: 'bg-red-500', icon: 'XCircle' },
-  CANCELLED: { label: 'Annule', color: 'bg-gray-500', icon: 'Ban' },
+  COMPLETED: { label: 'Terminé', color: 'bg-green-500', icon: 'CheckCircle' },
+  FAILED: { label: 'Échoué', color: 'bg-red-500', icon: 'XCircle' },
+  CANCELLED: { label: 'Annulé', color: 'bg-gray-500', icon: 'Ban' },
 };

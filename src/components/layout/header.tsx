@@ -9,7 +9,7 @@ export function Header() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 sm:h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-14 sm:h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-4 sm:px-6">
       <div className="flex items-center gap-4 pl-10 lg:pl-0">
         <div className="relative hidden sm:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -23,7 +23,7 @@ export function Header() {
       <div className="flex items-center gap-1.5 sm:gap-2">
         <Button variant="ghost" size="icon" className="relative h-9 w-9">
           <Bell className="h-4 w-4" />
-          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-odixa-lime text-[10px] font-bold text-odixa-black flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-odixa-black dark:bg-odixa-lime text-[10px] font-bold text-white dark:text-odixa-black flex items-center justify-center">
             3
           </span>
         </Button>
@@ -39,7 +39,7 @@ export function Header() {
         </Button>
 
         <div className="ml-1 sm:ml-2 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-odixa-black to-odixa-purple flex items-center justify-center text-xs font-bold text-white">
+          <div className="h-8 w-8 rounded-full bg-odixa-black dark:bg-odixa-lime flex items-center justify-center text-xs font-bold text-white dark:text-odixa-black">
             U
           </div>
         </div>

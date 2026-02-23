@@ -39,16 +39,10 @@ export function Sidebar() {
     <>
       {/* Logo Odixa */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg overflow-hidden">
-          <img src="/logo-odixa.svg" alt="Odixa" className="h-9 w-9 object-contain" />
-        </div>
-        {!collapsed && (
-          <div className="flex flex-col">
-            <span className="text-base font-bold tracking-tight">Odixa</span>
-            <span className="text-[10px] text-muted-foreground">Audit UI/UX</span>
-          </div>
-        )}
-        {/* Mobile close */}
+        <Link href="/" className="flex items-center gap-2.5 min-w-0">
+          <img src="/logo-odixa-black.png" alt="Odixa" className={cn('dark:hidden object-contain', collapsed ? 'h-6' : 'h-6')} />
+          <img src="/logo-odixa-lime.png" alt="Odixa" className={cn('hidden dark:block object-contain', collapsed ? 'h-6' : 'h-6')} />
+        </Link>
         <button
           className="ml-auto lg:hidden p-1.5 rounded-lg hover:bg-muted transition-colors"
           onClick={() => setMobileOpen(false)}
@@ -57,11 +51,11 @@ export function Sidebar() {
         </button>
       </div>
 
-      {/* Quick action — above nav */}
+      {/* Quick action */}
       {!collapsed ? (
         <div className="px-3 pt-3">
           <Link href="/audit/new">
-            <Button variant="gradient" className="w-full" size="sm">
+            <Button className="w-full" size="sm">
               <Plus className="h-4 w-4" />
               Lancer un audit
             </Button>
@@ -72,7 +66,7 @@ export function Sidebar() {
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Link href="/audit/new">
-                <Button variant="gradient" className="w-full p-2" size="sm">
+                <Button className="w-full p-2" size="sm">
                   <Plus className="h-4 w-4" />
                 </Button>
               </Link>
@@ -92,10 +86,10 @@ export function Sidebar() {
             <Link
               href={item.href}
               className={cn(
-                'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
+                'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                 isActive
                   ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+                  : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
               )}
             >
               <Icon className={cn('h-[18px] w-[18px] shrink-0', isActive && 'text-sidebar-primary')} />
@@ -125,7 +119,6 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile trigger in header area */}
       <button
         className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-background border border-border shadow-sm hover:bg-muted transition-colors"
         onClick={() => setMobileOpen(true)}
@@ -134,7 +127,6 @@ export function Sidebar() {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
@@ -142,7 +134,6 @@ export function Sidebar() {
         />
       )}
 
-      {/* Mobile sidebar */}
       <aside
         className={cn(
           'fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-300 lg:hidden',
@@ -152,7 +143,6 @@ export function Sidebar() {
         {sidebarContent}
       </aside>
 
-      {/* Desktop sidebar */}
       <aside
         className={cn(
           'relative hidden lg:flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300',
@@ -161,10 +151,9 @@ export function Sidebar() {
       >
         {sidebarContent}
 
-        {/* Collapse button (desktop only) */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border bg-background shadow-sm hover:bg-accent transition-colors"
+          className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border bg-background shadow-sm hover:bg-muted transition-colors"
         >
           {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
         </button>

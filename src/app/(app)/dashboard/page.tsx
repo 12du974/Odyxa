@@ -91,7 +91,7 @@ export default async function DashboardPage() {
           value={avgScore !== null ? `${avgScore}` : '--'}
           subtitle={avgScore !== null ? (avgScore >= 70 ? 'Bonne santé UX' : 'Améliorations nécessaires') : 'Aucun audit'}
           icon={<TrendingUp className="h-4 w-4" />}
-          iconBg="bg-odixa-lime/10 text-odixa-purple"
+          iconBg="bg-violet-500/10 text-violet-500"
         />
         <StatCard
           title="Projets"
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
         </div>
 
         {audits.length === 0 ? (
-          <Card className="border-dashed">
+          <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <div className="mb-4 rounded-full bg-muted p-4">
                 <Globe className="h-8 w-8 text-muted-foreground" />

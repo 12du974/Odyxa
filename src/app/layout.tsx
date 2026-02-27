@@ -12,6 +12,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+      </head>
       <body className="min-h-screen font-sans antialiased">
         {children}
       </body>

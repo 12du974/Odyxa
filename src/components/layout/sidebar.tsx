@@ -95,7 +95,7 @@ export function Sidebar() {
               <Icon className={cn('h-[18px] w-[18px] shrink-0', isActive && 'text-sidebar-primary')} />
               {!collapsed && <span>{item.label}</span>}
               {isActive && !collapsed && (
-                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-odixa-lime" />
+                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-odixa-purple" />
               )}
             </Link>
           );

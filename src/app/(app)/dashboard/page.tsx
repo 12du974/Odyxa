@@ -41,7 +41,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <Link href="/audit/new">
-          <Button variant="default" className="w-full sm:w-auto">
+          <Button variant="default" size="sm" className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Nouvel Audit
           </Button>
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
                 Lancez votre premier audit pour analyser l&rsquo;UX de votre site.
               </p>
               <Link href="/audit/new">
-                <Button variant="default">
+                <Button variant="default" size="sm">
                   <Plus className="h-4 w-4" /> Lancer un audit
                 </Button>
               </Link>

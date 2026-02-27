@@ -228,12 +228,12 @@ export default function NewAuditPage() {
 
       {/* Navigation */}
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}>
+        <Button variant="outline" size="sm" onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}>
           <ArrowLeft className="h-4 w-4" /> Retour
         </Button>
 
         {step < 3 ? (
-          <Button onClick={() => {
+          <Button size="sm" onClick={() => {
             if (step === 1 && (!projectName || !url)) {
               setError('Veuillez remplir tous les champs.');
               return;
@@ -244,7 +244,7 @@ export default function NewAuditPage() {
             Suivant <ArrowRight className="h-4 w-4" />
           </Button>
         ) : (
-          <Button variant="default" size="lg" onClick={handleSubmit} disabled={loading || selectedCategories.length === 0}>
+          <Button variant="default" size="sm" onClick={handleSubmit} disabled={loading || selectedCategories.length === 0}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
             {loading ? 'Lancement...' : "Lancer l’audit"}
           </Button>

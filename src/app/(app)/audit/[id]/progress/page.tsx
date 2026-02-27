@@ -163,7 +163,7 @@ export default function AuditProgressPage() {
 
       {audit?.status === 'COMPLETED' && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <Button variant="default" size="lg" onClick={() => router.push(`/audit/${auditId}`)}>
+          <Button variant="default" size="sm" onClick={() => router.push(`/audit/${auditId}`)}>
             Voir le rapport <ArrowRight className="h-4 w-4" />
           </Button>
         </motion.div>
@@ -171,7 +171,7 @@ export default function AuditProgressPage() {
 
       {audit?.status === 'FAILED' && (
         <div className="text-center">
-          <Button variant="outline" onClick={() => router.push('/dashboard')}>Retour au dashboard</Button>
+          <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>Retour au dashboard</Button>
         </div>
       )}
     </div>

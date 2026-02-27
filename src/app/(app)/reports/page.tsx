@@ -37,7 +37,7 @@ export default async function ReportsPage() {
             <div className="mb-4 rounded-full bg-muted p-4"><BarChart3 className="h-8 w-8 text-muted-foreground" /></div>
             <h3 className="text-lg font-semibold">Aucun rapport</h3>
             <p className="mt-1 text-sm text-muted-foreground mb-4">Les rapports apparaitront ici une fois un audit termine.</p>
-            <Link href="/audit/new"><Button variant="default">Lancer un audit</Button></Link>
+            <Link href="/audit/new"><Button variant="default" size="sm">Lancer un audit</Button></Link>
           </CardContent>
         </Card>
       ) : (

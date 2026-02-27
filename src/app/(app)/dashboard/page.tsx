@@ -1,47 +1,10 @@
 import Link from 'next/link';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Plus, TrendingUp, Globe, AlertTriangle, CheckCircle2, ArrowUpRight } from 'lucide-react';
-import { formatRelativeTime } from '@/lib/utils';
-import { AuditActions } from '@/components/audit-actions';
-
-function getScoreColor(score: number | null) {
-  if (score === null) return 'text-muted-foreground';
-  if (score >= 80) return 'text-green-500';
-  if (score >= 60) return 'text-yellow-500';
-  if (score >= 40) return 'text-orange-500';
-  return 'text-red-500';
-}
-
-function getScoreBg(score: number | null) {
-  if (score === null) return 'bg-muted';
-  if (score >= 80) return 'bg-green-500/10';
-  if (score >= 60) return 'bg-yellow-500/10';
-  if (score >= 40) return 'bg-orange-500/10';
-  return 'bg-red-500/10';
-}
-
-const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'success' | 'outline'> = {
-  COMPLETED: 'success',
-  FAILED: 'destructive',
-  QUEUED: 'secondary',
-  CRAWLING: 'default',
-  SCANNING: 'default',
-  ANALYZING: 'default',
-};
-
-const statusLabels: Record<string, string> = {
-  QUEUED: 'En attente',
-  CRAWLING: 'Crawling...',
-  SCANNING: 'Scan...',
-  ANALYZING: 'Analyse...',
-  COMPLETED: 'Terminé',
-  FAILED: 'Échoué',
-  CANCELLED: 'Annulé',
-};
+import { AuditRow } from '@/components/audit-row';
 
 type AuditWithProject = Prisma.AuditGetPayload<{ include: { project: true } }>;
 
@@ -148,49 +111,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="flex flex-col gap-4">
             {audits.map((audit, i) => (
-              <Link key={audit.id} href={audit.status === 'COMPLETED' ? `/audit/${audit.id}` : `/audit/${audit.id}/progress`}>
-                <Card className="group cursor-pointer transition-all hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
-                      style={{ animationDelay: `${i * 50}ms` }}>
-                  <CardContent className="flex items-center gap-4 p-5">
-                    {/* Score */}
-                    <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${getScoreBg(audit.globalScore)}`}>
-                      <span className={`text-xl font-bold tabular-nums ${getScoreColor(audit.globalScore)}`}>
-                        {audit.globalScore !== null ? Math.round(audit.globalScore) : '--'}
-                      </span>
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold truncate">{audit.project.name}</p>
-                        <Badge variant={statusVariants[audit.status] || 'secondary'}>
-                          {statusLabels[audit.status] || audit.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground truncate">{audit.project.url}</p>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="hidden sm:flex items-center gap-6">
-                      <div className="text-right">
-                        <p className="text-sm font-medium">{audit.pagesScanned}</p>
-                        <p className="text-xs text-muted-foreground">pages</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">{audit.issuesFound}</p>
-                        <p className="text-xs text-muted-foreground">problèmes</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">
-                          {formatRelativeTime(audit.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <AuditActions auditId={audit.id} projectName={audit.project.name} />
-                  </CardContent>
-                </Card>
-              </Link>
+              <AuditRow key={audit.id} audit={audit} index={i} />
             ))}
           </div>
         )}

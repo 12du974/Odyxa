@@ -4,8 +4,9 @@ import { prisma } from '@/lib/db';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, TrendingUp, TrendingDown, Globe, AlertTriangle, CheckCircle2, Clock, ArrowUpRight } from 'lucide-react';
+import { Plus, TrendingUp, Globe, AlertTriangle, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/utils';
+import { AuditActions } from '@/components/audit-actions';
 
 function getScoreColor(score: number | null) {
   if (score === null) return 'text-muted-foreground';
@@ -186,7 +187,7 @@ export default async function DashboardPage() {
                       </div>
                     </div>
 
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <AuditActions auditId={audit.id} projectName={audit.project.name} />
                   </CardContent>
                 </Card>
               </Link>

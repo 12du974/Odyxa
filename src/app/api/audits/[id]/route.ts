@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
-import { getAuditState } from '@/lib/audit-state';
+import { getAuditState, cleanupAuditState } from '@/lib/audit-state';
 
 type AuditWithProject = Prisma.AuditGetPayload<{ include: { project: true } }>;
 
@@ -40,4 +40,35 @@ export async function GET(
     },
     logs: state?.logs || [],
   });
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { name } = await request.json();
+    if (!name?.trim()) return NextResponse.json({ error: 'Nom invalide' }, { status: 400 });
+
+    const audit = await prisma.audit.findUnique({ where: { id: params.id }, include: { project: true } });
+    if (!audit) return NextResponse.json({ error: 'Audit non trouvé' }, { status: 404 });
+
+    await prisma.project.update({ where: { id: audit.projectId }, data: { name: name.trim() } });
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await prisma.audit.delete({ where: { id: params.id } });
+    cleanupAuditState(params.id);
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+  }
 }

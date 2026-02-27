@@ -145,7 +145,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-4">
             {audits.map((audit, i) => (
               <Link key={audit.id} href={audit.status === 'COMPLETED' ? `/audit/${audit.id}` : `/audit/${audit.id}/progress`}>
                 <Card className="group cursor-pointer transition-all hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"

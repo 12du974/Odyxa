@@ -149,7 +149,7 @@ export default function NewAuditPage() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Pages max</label>
                     <Input type="number" min={1} max={100} value={maxPages} onChange={(e) => setMaxPages(Number(e.target.value))} />
-                    <p className="text-xs text-muted-foreground">Nombre de pages a scanner</p>
+                    <p className="text-xs text-muted-foreground">Nombre de pages à scanner</p>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Profondeur max</label>
@@ -211,8 +211,8 @@ export default function NewAuditPage() {
                 </div>
 
                 <div className="mt-4 flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedCategories([...ALL_CATEGORIES])}>Tout selectionner</Button>
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedCategories([])}>Tout deselectionner</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedCategories([...ALL_CATEGORIES])}>Tout sélectionner</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedCategories([])}>Tout désélectionner</Button>
                 </div>
               </CardContent>
             </Card>

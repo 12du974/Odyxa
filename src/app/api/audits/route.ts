@@ -35,7 +35,9 @@ export async function POST(request: NextRequest) {
     });
 
     initAuditState(audit.id);
-    runAudit(audit.id, url, scanConfig);
+    runAudit(audit.id, url, scanConfig).catch((err) => {
+      console.error(`[audit ${audit.id}] Erreur non gérée dans runAudit:`, err instanceof Error ? err.message : String(err));
+    });
 
     return NextResponse.json({ auditId: audit.id, projectId: project.id });
   } catch (err) {

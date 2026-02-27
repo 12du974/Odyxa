@@ -30,5 +30,5 @@ export function updateAuditState(id: string, update: Partial<AuditState>) {
 }
 
 export function cleanupAuditState(id: string) {
-  setTimeout(() => states.delete(id), 10 * 60 * 1000);
+  setTimeout(() => states.delete(id), 30 * 60 * 1000);
 }

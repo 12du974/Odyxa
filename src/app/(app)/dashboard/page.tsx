@@ -1,10 +1,12 @@
 import Link from 'next/link';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, TrendingUp, TrendingDown, Globe, AlertTriangle, CheckCircle2, Clock, ArrowUpRight } from 'lucide-react';
+import { Plus, TrendingUp, Globe, AlertTriangle, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/utils';
+import { AuditActions } from '@/components/audit-actions';
 
 function getScoreColor(score: number | null) {
   if (score === null) return 'text-muted-foreground';
@@ -41,10 +43,12 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Annulé',
 };
 
+type AuditWithProject = Prisma.AuditGetPayload<{ include: { project: true } }>;
+
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  let audits: any[] = [];
+  let audits: AuditWithProject[] = [];
   let projectCount = 0;
   try {
     audits = await prisma.audit.findMany({
@@ -88,7 +92,7 @@ export default async function DashboardPage() {
           value={avgScore !== null ? `${avgScore}` : '--'}
           subtitle={avgScore !== null ? (avgScore >= 70 ? 'Bonne santé UX' : 'Améliorations nécessaires') : 'Aucun audit'}
           icon={<TrendingUp className="h-4 w-4" />}
-          iconBg="bg-odixa-lime/10 text-odixa-purple"
+          iconBg="bg-violet-500/10 text-violet-500"
         />
         <StatCard
           title="Projets"
@@ -125,7 +129,7 @@ export default async function DashboardPage() {
         </div>
 
         {audits.length === 0 ? (
-          <Card className="border-dashed">
+          <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <div className="mb-4 rounded-full bg-muted p-4">
                 <Globe className="h-8 w-8 text-muted-foreground" />
@@ -142,7 +146,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-4">
             {audits.map((audit, i) => (
               <Link key={audit.id} href={audit.status === 'COMPLETED' ? `/audit/${audit.id}` : `/audit/${audit.id}/progress`}>
                 <Card className="group cursor-pointer transition-all hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
@@ -183,7 +187,7 @@ export default async function DashboardPage() {
                       </div>
                     </div>
 
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <AuditActions auditId={audit.id} projectName={audit.project.name} />
                   </CardContent>
                 </Card>
               </Link>

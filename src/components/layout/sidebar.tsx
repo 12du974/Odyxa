@@ -57,7 +57,7 @@ export function Sidebar() {
           <Link href="/audit/new">
             <Button className="w-full" size="sm">
               <Plus className="h-4 w-4" />
-              Lancer un audit
+              Nouvel audit
             </Button>
           </Link>
         </div>
